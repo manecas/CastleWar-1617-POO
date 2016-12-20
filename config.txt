@@ -1,0 +1,45 @@
+dim 20 100
+moedas 50
+oponentes 1
+castelo a 20 20
+mkperfil z
+addperfil z 1
+addperfil z 2
+addperfil z 3
+addperfil z 4
+addperfil z 5
+subperfil z 2
+addperfil z 2
+rmperfil z
+mkperfil z
+addperfil z 1
+addperfil z 2
+addperfil z 3
+addperfil z 4
+addperfil z 5
+subperfil z 2
+mkperfil x
+addperfil x 6
+addperfil x 5
+addperfil x 4
+addperfil x 7
+addperfil x 8
+mkperfil y
+addperfil y 9
+addperfil y 10
+addperfil y 11
+addperfil y 12
+addperfil y 13
+mkperfil v
+addperfil v 9
+addperfil v 10
+addperfil v 11
+addperfil v 12
+addperfil v 13
+mkperfil w
+addperfil w 14
+addperfil w 14
+addperfil w 14
+addperfil w 14
+addperfil w 14
+inicio
