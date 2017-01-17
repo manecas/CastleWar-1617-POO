@@ -43,7 +43,13 @@ Perfil::~Perfil() {
 
 int Perfil::getForca() const { return forca; }
 
-int Perfil::getTotalPreco() const { return preco; }
+int Perfil::getTotalPreco() const { 
+	int totalPreco = 0;
+	for (Caracteristica *c : caracteristicas)
+		totalPreco += c->getCustoMonetario();
+
+	return totalPreco;
+}
 
 int Perfil::getTotalAtaque() const{
 	int totalAtaque = 0;
@@ -67,6 +73,22 @@ int Perfil::getTotalVelocidade() const{
 		totalVelocidade += c->getVelocidade();
 
 	return totalVelocidade;
+}
+
+int Perfil::getSaudeMaxima() const{
+	int saudeMaxima = 0;
+	for (Caracteristica *c : caracteristicas)
+		saudeMaxima += c->getSaudeMaxima();
+
+	return saudeMaxima;
+}
+
+bool Perfil::bandeiraExiste() const{
+	for (Caracteristica *c : caracteristicas)
+		if (c->getId() == 1)
+			return true;
+
+	return false;
 }
 
 void Perfil::getCaracteristicas(vector<Caracteristica*> & carac){
@@ -109,12 +131,12 @@ bool Perfil::removeCaracteristica(int id){
 
 }
 
-void Perfil::atua(Ser * s, Planicie * p) {
+void Perfil::atua(Ser * s, Colonia * col,  Planicie * p) {
 	if (s == nullptr)
 		return;
 
 	for each (Caracteristica *c in caracteristicas) {
-		c->efeito(s, p);
+		c->efeito(s, col, p);
 	}
 }
 

@@ -1,0 +1,9 @@
+dim 20 100
+moedas 100
+oponentes 1
+mkperfil w
+addperfil w 1
+addperfil w 11
+castelo a 0 0
+castelo b 5 5
+inicio

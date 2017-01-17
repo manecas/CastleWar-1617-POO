@@ -156,6 +156,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Perfil.cpp" />
     <ClCompile Include="Planicie.cpp" />
+    <ClCompile Include="Posicao.cpp" />
     <ClCompile Include="Ser.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +171,7 @@
     <ClInclude Include="Interface.h" />
     <ClInclude Include="Perfil.h" />
     <ClInclude Include="Planicie.h" />
+    <ClInclude Include="Posicao.h" />
     <ClInclude Include="Ser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

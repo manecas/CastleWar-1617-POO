@@ -2,6 +2,7 @@
 #include "Interface.h"
 #include <time.h>
 #include <assert.h>
+#include "Consola.h"
 
 #include <iostream>
 
@@ -16,7 +17,6 @@ int main(){
 
 	return 0;
 }
-
 
 // Biblioteca Consola para TP de POO
 // Última alteracao: 16/17 - Dez 2016

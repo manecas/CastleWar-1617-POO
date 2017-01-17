@@ -1,6 +1,0 @@
-dim 20 100
-moedas 100
-oponentes 1
-mkperfil w
-addperfil w 11
-inicio

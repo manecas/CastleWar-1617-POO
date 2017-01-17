@@ -14,7 +14,26 @@ int Planicie::pesquisaPerfil(char letra) const{
 	return -1;
 }
 
-Planicie::Planicie(int lin, int col) : nLinhas(lin), nColunas(col), instante(0), vezJogada(0){
+Perfil * Planicie::pesquisaPerfilPorLetra(char letra) const{
+	
+	for each (Perfil *p in perfis){
+		if (p->getLetra() == letra)
+			return p;
+	}
+
+	return nullptr;
+}
+
+void Planicie::getPosicoesAdjacentes(vector<Posicao>& pos, int x, int y){
+
+	for each (Colonia *c in colonias){
+		c->getPosicoesAdjacentes(pos, x, y, this);
+	}
+
+}
+
+Planicie::Planicie(int lin, int col) : nLinhas(lin), nColunas(col), instante(0), 
+vezJogada(0), nomeJogo(""){
 	Colonia *c = new Colonia(LETRAS[0], this);
 	if (c == nullptr)
 		return;
@@ -50,8 +69,11 @@ Planicie & Planicie::operator=(const Planicie & ob)
 		perfis.push_back(new Perfil(*p));
 	}
 
+	nomeJogo = ob.nomeJogo;
 	nLinhas = ob.nLinhas;
 	nColunas = ob.nColunas;
+	instante = ob.instante;
+	vezJogada = ob.vezJogada;
 
 	return *this;
 }
@@ -93,6 +115,15 @@ void Planicie::atua(){
 
 	//Verificar se uma colonia foi destruida
 }
+
+void Planicie::setNome(string nome){
+	if (nome.length() == 0)
+		nomeJogo = "defeito";
+
+	nomeJogo = nome;
+}
+
+string Planicie::getNome() const { return nomeJogo; }
 
 void Planicie::setNLinhas(int lin){ 
 	if (lin > 0)
@@ -197,15 +228,95 @@ void Planicie::setMoedas(int moedas){
 
 int Planicie::fabricaSeres(int num, char letraPerfil){
 	int i = pesquisaPerfil(letraPerfil);
-	if (i == -1 || num <= 0)
+	if (i == -1)
 		return -1;
 
+	if (num <= 0)
+		return 5;
+
 	Perfil *p = perfis[i];
-	Colonia *c = pesquisaColonia(LETRAS[vezJogada]);
-	if (p == nullptr || c == nullptr)
+
+	if (p == nullptr)
+		return -1;
+
+	Colonia *c = pesquisaColonia(LETRAS[0]);
+	if (c == nullptr)
 		return -1;
 
 	return c->fabricaSeres(num, p);
+}
+
+int Planicie::setMoedas(char letra, int moedas){
+	Colonia *c = pesquisaColonia(letra);
+
+	if (c == nullptr)
+		return -1;
+
+	if (moedas <= 0)
+		return 5;
+
+	c->setMoedas(moedas);
+	return 6;
+}
+
+int Planicie::constroiEdificio(int id, int lin, int col){
+
+	//Caso adicionemos mais edifícios, ter isto em atenção
+	if (id < 2 || id > 3)
+		return 8;
+
+	Colonia *c = pesquisaColonia(LETRAS[0]);
+	if (c == nullptr)
+		return -1;
+
+	return c->constroiEdificio(id, lin, col, this, false);
+}
+
+int Planicie::constroiEdificio(int id, int lin, int col, char letra){
+	
+	//Caso adicionemos mais edifícios, ter isto em atenção
+	if (id < 2 || id > 3)
+		return 8;
+
+	Colonia *c = pesquisaColonia(letra);
+	if (c == nullptr)
+		return -1;
+
+	return c->constroiEdificio(id, lin, col, this, true);
+
+}
+
+int Planicie::reparaEdificio(int eid){
+	Colonia *c = pesquisaColonia(LETRAS[0]);
+	if (c == nullptr)
+		return -1;
+
+	if (eid < 0)
+		return -1;
+
+	return c->reparaEdificio(eid);
+}
+
+int Planicie::updgradeEdificio(int eid) {
+	Colonia *c = pesquisaColonia(LETRAS[0]);
+	if (c == nullptr)
+		return -1;
+
+	if (eid < 0)
+		return -1;
+
+	return c->updgradeEdificio(eid);
+}
+
+int Planicie::venderEdificio(int eid){
+	Colonia *c = pesquisaColonia(LETRAS[0]);
+	if (c == nullptr)
+		return -1;
+
+	if (eid < 0)
+		return -1;
+
+	return c->venderEdificio(eid);
 }
 
 bool Planicie::mudaCastelo(char letra, int lin, int col){
@@ -214,5 +325,4 @@ bool Planicie::mudaCastelo(char letra, int lin, int col){
 		return false;
 
 	return c->mudaCastelo(col, lin, this);
-	
 }

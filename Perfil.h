@@ -10,6 +10,7 @@ using std::vector;
 class Caracteristica;
 class Ser;
 class Planicie;
+class Colonia;
 
 class Perfil {
 	int preco;
@@ -26,12 +27,14 @@ public:
 	int getTotalAtaque()const;
 	int getTotalDefesa()const;
 	int getTotalVelocidade()const;
+	int getSaudeMaxima()const;
+	bool bandeiraExiste()const;
 	void getCaracteristicas(vector<Caracteristica*> & carac);
 	char getLetra()const;
 	int pesquisaCaracteristica(int id);
 	bool addCaracteristica(int id);
 	bool removeCaracteristica(int id);
-	void atua(Ser * s, Planicie * p);
+	void atua(Ser * s, Colonia * col, Planicie * p);
 	string toString()const;
 };
 

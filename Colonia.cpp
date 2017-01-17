@@ -48,6 +48,17 @@ Colonia & Colonia::operator=(const Colonia & ob){
 		seres.push_back(s);
 	}
 
+	//Destruir parias
+	for (unsigned i = 0; i < parias.size(); i++) {
+		delete parias[i];
+	}
+	parias.clear();
+
+	for (unsigned i = 0; i < ob.parias.size(); i++) {
+		Ser *s = ob.parias[i]->duplica();
+		parias.push_back(s);
+	}
+
 	//Destruir edificios
 	for (unsigned i = 0; i < edificios.size(); i++) {
 		delete edificios[i];
@@ -70,10 +81,17 @@ Colonia::~Colonia(){
 	for (unsigned int i = 0; i < seres.size(); i++) {
 		delete seres[i];
 	}
+	seres.clear();
+
+	for (unsigned int i = 0; i < parias.size(); i++) {
+		delete parias[i];
+	}
+	parias.clear();
 
 	for (unsigned int i = 0; i < edificios.size(); i++) {
 		delete edificios[i];
 	}
+	edificios.clear();
 }
 
 bool Colonia::addSer(Ser * s){
@@ -82,6 +100,25 @@ bool Colonia::addSer(Ser * s){
 
 	seres.push_back(s);
 	return true;
+}
+
+bool Colonia::addParia(Ser * s){
+	if (s == nullptr)
+		return false;
+
+	parias.push_back(s);
+	return true;
+}
+
+void Colonia::removeParias(int x, int y){
+
+	int i = pesquisaParia(x, y);
+	if (i == -1)
+		return;
+
+	delete parias[i];
+	parias.erase(parias.begin() + i);
+
 }
 
 bool Colonia::verificaInterseccaoCastelo(int xNovo, int yNovo, Planicie * p) const{
@@ -152,10 +189,17 @@ bool Colonia::verificaLimiteColonia(int xNovo, int yNovo, Planicie * p) const{
 	return false;
 }
 
-int Colonia::pesquisaSer(int x, int y) const
-{
+int Colonia::pesquisaSer(int x, int y) const{
 	for (unsigned int i = 0; i < seres.size(); i++){
 		if (seres[i]->getX() == x && seres[i]->getY() == y)
+			return i;
+	}
+	return -1;
+}
+
+int Colonia::pesquisaParia(int x, int y) const{
+	for (unsigned int i = 0; i < parias.size(); i++) {
+		if (parias[i]->getX() == x && parias[i]->getY() == y)
 			return i;
 	}
 	return -1;
@@ -170,14 +214,17 @@ void Colonia::removeSeres(int x, int y){
 	seres.erase(seres.begin() + i);
 }
 
-bool Colonia::addEdificio(int id, int x, int y){
-	Edificio *e = FabricaEdificios::cria(id, x, y);
+bool Colonia::addEdificio(Edificio * e){
 	if (e == nullptr)
 		return false;
 
 	edificios.push_back(e);
 	return true;
 }
+
+bool Colonia::mandouRecolher() const{ return recolheu; }
+
+void Colonia::setMandouRecolher(bool mandouR) { recolheu = mandouR; }
 
 int Colonia::pesquisaEdificio(int x, int y) const{
 	for (unsigned int i = 0; i < edificios.size(); i++) {
@@ -203,12 +250,34 @@ Edificio * Colonia::pesquisaEdificioPorTipo(int id) const{
 	return nullptr;
 }
 
+Ser * Colonia::pesquisaSerPorIndice(int indice) const{ 
+	if (indice < 0)
+		return nullptr;
+
+	return seres[indice]; 
+}
+
+Ser * Colonia::pesquisaPariaPorIndice(int indice) const{
+	if (indice < 0)
+		return nullptr;
+
+	return parias[indice];
+}
+
+Edificio * Colonia::pesquisaEdificioPorIndice(int indice) const { 
+	if (indice < 0) 
+		return nullptr;
+
+	return edificios[indice]; 
+}
+
+void Colonia::reiniciaCor() { incrementaCor = 1; }
+
 void Colonia::removeEdificios(int x, int y){
 	int i = pesquisaEdificio(x, y);
 	if (i == -1)
 		return;
 
-	//vector temporario
 	delete edificios[i];
 	edificios.erase(edificios.begin() + i);
 }
@@ -226,23 +295,75 @@ char Colonia::getLetra() const{ return letra; }
 
 int Colonia::getCor() const{ return cor; }
 
+void Colonia::getPosicoesAdjacentes(vector<Posicao> & pos, int x, int y, Planicie * p){
+
+	if (p == nullptr)
+		return;
+
+	
+}
+
 void Colonia::getSeres(vector<Ser*> & ss){
-	for (Ser *s : seres)
+	for each(Ser *s in seres)
 		ss.push_back(s);
 }
 
 void Colonia::getEdificios(vector<Edificio*> & ee){
-	for (Edificio *e : edificios)
+	for each(Edificio *e in edificios)
 		ee.push_back(e);
 }
 
-int Colonia::fabricaSeres(int num, Perfil * p){ return pesquisaEdificioPorTipo(ID_CASTELO)->fabricaSeres(this, num, p); }
+int Colonia::fabricaSeres(int num, Perfil * p){
+
+	Edificio * e = pesquisaEdificioPorTipo(ID_CASTELO);
+
+	if (e == nullptr)
+		return 3;
+
+	return e->fabricaSeres(this, num, p); 
+}
+
+int Colonia::constroiEdificio(int id, int lin, int col, Planicie * p, bool debug){
+
+	if (p == nullptr)
+		return -1;
+
+	if (!p->verificaLimitePlanicie(col, lin))
+		return -1;
+
+	Edificio *e = FabricaEdificios::cria(id, col, lin);
+
+	if (e == nullptr)
+		return -1;
+
+	for (int i = 0; i < p->getNumColonias(); i++){
+		Colonia * c = p->pesquisaColonia(i);
+		if (c == nullptr)
+			return -1;
+
+		if (c->pesquisaEdificio(col, lin) != -1 || c->pesquisaSer(col, lin) != -1)
+			return 10;
+	}
+
+	if (!verificaLimiteColonia(col, lin, p))
+		return 11;
+
+	if (!debug) { //Build
+		if (moedas - e->getCusto() < 0)
+			return 2;
+		else 
+			moedas -= e->getCusto();
+	}
+
+	addEdificio(e);
+	return 9;
+}
 
 bool Colonia::mudaCastelo(int x, int y, Planicie * p){
 	if (p == nullptr)
 		return false;
 
-	if (!verificaInterseccaoCastelo(x, y, p) || !verificaLimitePlanicie(x, y, p))
+	if (/*!verificaInterseccaoCastelo(x, y, p) || */!verificaLimitePlanicie(x, y, p))
 		return false;
 
 	Edificio *e = pesquisaEdificioPorTipo(ID_CASTELO);
@@ -267,15 +388,64 @@ void Colonia::atuaAtaqueSer(Planicie * p){
 	if (p == nullptr)
 		return;
 
-	for (Ser *s : seres)
-		s->atua(this, p);
+	if (!mandouRecolher()) {
+		for (Ser *s : seres)
+			s->atua(this, p);
+	}
+	else {
+		for (Ser *s : seres)
+			s->mandarRecolher(this);
+	}
+}
+
+int Colonia::reparaEdificio(int eid){
+	Edificio * e = pesquisaEdificioPorEid(eid);
+	if (e == nullptr)
+		return -1;;
+
+	if (e->getSaude() == e->getSaudeMaxima())
+		return 12;
+
+	int custo = (e->getCusto() * (e->getSaude() * 100) / e->getSaudeMaxima()) / 100;
+
+	if (moedas - custo < 0)
+		return 2;
+
+	return 6;
+}
+
+int Colonia::updgradeEdificio(int eid){
+	Edificio * e = pesquisaEdificioPorEid(eid);
+	if (e == nullptr)
+		return -1;;
+
+	return e->upgrade(this);
+}
+
+int Colonia::venderEdificio(int eid) {
+	Edificio * e = pesquisaEdificioPorEid(eid);
+	if (e == nullptr)
+		return -1;;
+
+	if (e->getId() == ID_CASTELO)
+		return 12;
+
+	moedas += (e->getCusto() * e->getNumUpgrades()) / 2;
+	removeEdificios(e->getX(), e->getY());
+	return 13;
 }
 
 void Colonia::elimina(){
-	for (Ser *s : seres)
+	vector<Ser*> copiaS = seres;
+	for (Ser *s : copiaS)
+		s->verificaSaude(this);
+	
+	vector<Ser*> copiaP = parias;
+	for (Ser *s : copiaP)
 		s->verificaSaude(this);
 
-	for (Edificio *e : edificios)
+	vector<Edificio*> copiaE = edificios;
+	for (Edificio *e : copiaE)
 		e->verificaDestruicao(this);
 }
 
