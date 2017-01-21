@@ -11,7 +11,6 @@ class Planicie;
 
 class Ser {
 	Perfil perfil;
-	bool entrouCastelo;
 	int numAtaques; 
 	int saudeMaxima;
 	int saude;
@@ -34,13 +33,15 @@ public:
 	int getNumAtaques()const;
 	char getLetraPerfil()const;
 
-	bool getEntrouCastelo()const;
-	void setEntrouCastelo(bool val);
-	void mandarRecolher(Colonia *c);
+	void reiniciaCaracteristicas();
 
+	void setNumAtaques(int ataques);
 	void setAtaque(int at);
 	void setDefesa(int def);
 	void recebeAtaque(int forcaAtaque);
+	void aumentaDefesa(int d);
+	void diminuiAtaque(int a);
+	void aumentaAtaque(int a);
 	void diminuiSaude(int s);
 	void aumentaSaude(int s);
 	void aumentaSaudeMaxima(int saudeMax);
@@ -52,7 +53,7 @@ public:
 	Ser * duplica()const;
 
 	//Verificar destruicao seres
-	void verificaSaude(Colonia * c);
+	void verificaSaude(Colonia * c, Planicie * p);
 	string toString()const;
 };
 #endif // !_SER

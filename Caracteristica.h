@@ -17,8 +17,6 @@ class Caracteristica {
 	bool usou;
 public:
 	Caracteristica(const string & n, int iden, int custoM, int custoF, bool us);
-	/*Caracteristica(const Caracteristica & ob);
-	Caracteristica & operator=(const Caracteristica & ob);*/
 	virtual ~Caracteristica() = default;
 	string getNome()const;
 	int getId()const;
@@ -36,12 +34,10 @@ public:
 	virtual int getAtaque() = 0;
 	virtual int getDefesa()const = 0; 
 	virtual int getVelocidade()const = 0;
-
-	bool operator==(const Caracteristica * const c)const;
 };
 
 class Bandeira : public Caracteristica {
-
+	Colonia *c;
 public:
 	Bandeira();
 	virtual int getSaudeMaxima()const;
@@ -54,7 +50,6 @@ public:
 
 class Superior : public Caracteristica {
 	int saudeMax;
-	bool incrementou;
 public:
 	Superior();
 	virtual int getSaudeMaxima()const;
@@ -67,7 +62,6 @@ public:
 
 class PeleDura : public Caracteristica {
 	int defesa;
-	bool incrementou;
 public:
 	PeleDura();
 	virtual int getSaudeMaxima()const;
@@ -80,7 +74,6 @@ public:
 
 class Armadura : public Caracteristica {
 	int defesa;
-	bool incrementou;
 public:
 	Armadura();
 	virtual int getSaudeMaxima()const;
@@ -93,7 +86,6 @@ public:
 
 class Faca : public Caracteristica {
 	int ataque;
-	bool incrementou;
 public:
 	Faca();
 	virtual int getSaudeMaxima()const ;

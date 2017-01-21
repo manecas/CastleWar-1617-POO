@@ -11,22 +11,19 @@
 using namespace Constantes;
 using std::ostringstream;
 
-
 int Colonia::incrementaCor = 1;
 
-Colonia::Colonia(char l, Planicie * p):letra(l), cor(incrementaCor++){
+Colonia::Colonia(char l, Planicie * p):letra(l), cor(incrementaCor++), modoAtaque(false){
 	if (p == nullptr)
 		return;
 
 	int x = -1, y = -1;
 	//Enquanto houver intersecção continua a gerar coordenadas
 
-	do {
-		y = random(0, p->getNLinhas());
-		x = random(0, p->getNColunas());
-	} while (!verificaInterseccaoCastelo(x, y, p));
+	y = random(0, p->getNLinhas());
+	x = random(0, p->getNColunas());
 
-		Edificio *c = new Castelo(x, y, ID_CASTELO);
+	Edificio *c = new Castelo(x, y, ID_CASTELO);
 	if (c != nullptr)
 		edificios.push_back(c);
 }
@@ -48,17 +45,6 @@ Colonia & Colonia::operator=(const Colonia & ob){
 		seres.push_back(s);
 	}
 
-	//Destruir parias
-	for (unsigned i = 0; i < parias.size(); i++) {
-		delete parias[i];
-	}
-	parias.clear();
-
-	for (unsigned i = 0; i < ob.parias.size(); i++) {
-		Ser *s = ob.parias[i]->duplica();
-		parias.push_back(s);
-	}
-
 	//Destruir edificios
 	for (unsigned i = 0; i < edificios.size(); i++) {
 		delete edificios[i];
@@ -73,6 +59,7 @@ Colonia & Colonia::operator=(const Colonia & ob){
 	moedas = ob.moedas;
 	letra = ob.letra;
 	cor = ob.cor;
+	modoAtaque = ob.modoAtaque;
 
 	return *this;
 }
@@ -82,11 +69,6 @@ Colonia::~Colonia(){
 		delete seres[i];
 	}
 	seres.clear();
-
-	for (unsigned int i = 0; i < parias.size(); i++) {
-		delete parias[i];
-	}
-	parias.clear();
 
 	for (unsigned int i = 0; i < edificios.size(); i++) {
 		delete edificios[i];
@@ -102,24 +84,7 @@ bool Colonia::addSer(Ser * s){
 	return true;
 }
 
-bool Colonia::addParia(Ser * s){
-	if (s == nullptr)
-		return false;
 
-	parias.push_back(s);
-	return true;
-}
-
-void Colonia::removeParias(int x, int y){
-
-	int i = pesquisaParia(x, y);
-	if (i == -1)
-		return;
-
-	delete parias[i];
-	parias.erase(parias.begin() + i);
-
-}
 
 bool Colonia::verificaInterseccaoCastelo(int xNovo, int yNovo, Planicie * p) const{
 
@@ -197,14 +162,6 @@ int Colonia::pesquisaSer(int x, int y) const{
 	return -1;
 }
 
-int Colonia::pesquisaParia(int x, int y) const{
-	for (unsigned int i = 0; i < parias.size(); i++) {
-		if (parias[i]->getX() == x && parias[i]->getY() == y)
-			return i;
-	}
-	return -1;
-}
-
 void Colonia::removeSeres(int x, int y){
 	int i = pesquisaSer(x, y);
 	if (i == -1)
@@ -222,9 +179,23 @@ bool Colonia::addEdificio(Edificio * e){
 	return true;
 }
 
-bool Colonia::mandouRecolher() const{ return recolheu; }
+bool Colonia::estaEmModoAtaque() const{ return modoAtaque; }
 
-void Colonia::setMandouRecolher(bool mandouR) { recolheu = mandouR; }
+int Colonia::setModoRecolhe() { 
+	if (modoAtaque) {
+		modoAtaque = false;
+		return 18;
+	}
+	return 19;
+}
+
+int Colonia::setModoAtaque() {
+	if (!modoAtaque) {
+		modoAtaque = true;
+		return 20;
+	}
+	return 21;
+}
 
 int Colonia::pesquisaEdificio(int x, int y) const{
 	for (unsigned int i = 0; i < edificios.size(); i++) {
@@ -255,13 +226,6 @@ Ser * Colonia::pesquisaSerPorIndice(int indice) const{
 		return nullptr;
 
 	return seres[indice]; 
-}
-
-Ser * Colonia::pesquisaPariaPorIndice(int indice) const{
-	if (indice < 0)
-		return nullptr;
-
-	return parias[indice];
 }
 
 Edificio * Colonia::pesquisaEdificioPorIndice(int indice) const { 
@@ -295,12 +259,89 @@ char Colonia::getLetra() const{ return letra; }
 
 int Colonia::getCor() const{ return cor; }
 
-void Colonia::getPosicoesAdjacentes(vector<Posicao> & pos, int x, int y, Planicie * p){
+bool Colonia::verificaMovimentoSerXY(int xDest, int yDest){
 
-	if (p == nullptr)
-		return;
+	if (pesquisaSer(xDest, yDest) != -1 || pesquisaEdificio(xDest, yDest) != -1) {
+		return false;
+	}
 
+	return true;
+}
+
+bool Colonia::atacaSeresEdificiosAdjacentes(int x, int y, int forcaAta, Colonia * c){
+
+	if (this != c) {
+		int posS = pesquisaSer(x, y);
+		int posE = pesquisaEdificio(x, y);
+		if (posS != -1) {
+			Ser * s = pesquisaSerPorIndice(posS);
+			if (s == nullptr)
+				return false;
+			s->recebeAtaque(forcaAta);
+			return true;   
+		}
+		else if (posE != -1) {
+			Edificio *e = pesquisaEdificioPorIndice(posE);
+			if (e == nullptr)
+				return false;
+			e->recebeAtaque(forcaAta);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Colonia::atacaSeresAdjacentes(int x, int y, int forcaAta, Colonia * c){
+	if (this != c) {
+		int posS = pesquisaSer(x, y);
+		if (posS != -1) {
+			Ser * s = pesquisaSerPorIndice(posS);
+			if (s == nullptr)
+				return false;
+			s->recebeAtaque(forcaAta);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Colonia::atacaEdificiosAdjacentes(int x, int y, int forcaAta, Colonia * c){
+	if (this != c) {
+		int posE = pesquisaEdificio(x, y);
+		if (posE != -1) {
+			Edificio *e = pesquisaEdificioPorIndice(posE);
+			if (e == nullptr)
+				return false;
+			e->recebeAtaque(forcaAta);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Colonia::getPosicoesAdjacentes(int x, int y, vector<Posicao> & pos){
+
+	int posS = pesquisaSer(x, y);
+	int posE = pesquisaEdificio(x, y);
+	if (posS != -1 || posE != -1) {
+		return false;
+	}
 	
+	return true;
+}
+
+void Colonia::getSeresInimigos(vector<Ser*>& inimigos, Colonia * c){
+	if (this != c) {
+		for each(Ser *s in seres)
+			inimigos.push_back(s);
+	}
+}
+
+void Colonia::getEdificiosInimigos(vector<Edificio*>& inimigos, Colonia * c){
+	if (this != c) {
+		for each(Edificio *e in edificios)
+			inimigos.push_back(e);
+	}
 }
 
 void Colonia::getSeres(vector<Ser*> & ss){
@@ -313,14 +354,14 @@ void Colonia::getEdificios(vector<Edificio*> & ee){
 		ee.push_back(e);
 }
 
-int Colonia::fabricaSeres(int num, Perfil * p){
+int Colonia::fabricaSeres(int num, Perfil * p, Planicie * planicie){
 
 	Edificio * e = pesquisaEdificioPorTipo(ID_CASTELO);
 
 	if (e == nullptr)
 		return 3;
 
-	return e->fabricaSeres(this, num, p); 
+	return e->fabricaSeres(this, num, p, planicie); 
 }
 
 int Colonia::constroiEdificio(int id, int lin, int col, Planicie * p, bool debug){
@@ -329,7 +370,7 @@ int Colonia::constroiEdificio(int id, int lin, int col, Planicie * p, bool debug
 		return -1;
 
 	if (!p->verificaLimitePlanicie(col, lin))
-		return -1;
+		return 7;
 
 	Edificio *e = FabricaEdificios::cria(id, col, lin);
 
@@ -359,21 +400,20 @@ int Colonia::constroiEdificio(int id, int lin, int col, Planicie * p, bool debug
 	return 9;
 }
 
-bool Colonia::mudaCastelo(int x, int y, Planicie * p){
+int Colonia::mudaCastelo(int x, int y, Planicie * p){
 	if (p == nullptr)
-		return false;
+		return -1;
 
-	if (/*!verificaInterseccaoCastelo(x, y, p) || */!verificaLimitePlanicie(x, y, p))
-		return false;
+	if (!verificaLimitePlanicie(x, y, p))
+		return 7;
 
 	Edificio *e = pesquisaEdificioPorTipo(ID_CASTELO);
 	if (e == nullptr) 
-		return false;
+		return -1;
 
 	e->setX(x);
 	e->setY(y);
-
-	return true;
+	return 26;
 }
 
 void Colonia::atuaAtaqueEdificio(Planicie * p){
@@ -388,13 +428,36 @@ void Colonia::atuaAtaqueSer(Planicie * p){
 	if (p == nullptr)
 		return;
 
-	if (!mandouRecolher()) {
+	if (estaEmModoAtaque()) {
 		for (Ser *s : seres)
 			s->atua(this, p);
 	}
 	else {
-		for (Ser *s : seres)
-			s->mandarRecolher(this);
+		Edificio *e = pesquisaEdificioPorTipo(ID_CASTELO);
+		if (e == nullptr)
+			return;
+		for (Ser *s : seres) {
+			Posicao *posicao = Posicao::getPosicaoMovimento(s->getX(), s->getY(), e->getX(), e->getY());
+			if (posicao == nullptr)
+				continue;
+
+			if (posicao->getX() == e->getX() && posicao->getY() == e->getY()) {
+				s->setX(posicao->getX());
+				s->setY(posicao->getY());
+				s->reiniciaCaracteristicas();
+				s->aumentaSaude(1);
+				if (!estaEmModoAtaque()) {
+					if (s->getNumAtaques() == 1 || s->getNumAtaques() == 2) {
+						s->diminuiAtaque(1);
+						s->setNumAtaques(0);
+					}
+				}
+			}
+			else if (p->verificaMovimentoSerXY(posicao->getX(), posicao->getY())) {
+				s->setX(posicao->getX());
+				s->setY(posicao->getY());
+			}
+		}
 	}
 }
 
@@ -406,11 +469,21 @@ int Colonia::reparaEdificio(int eid){
 	if (e->getSaude() == e->getSaudeMaxima())
 		return 12;
 
-	int custo = (e->getCusto() * (e->getSaude() * 100) / e->getSaudeMaxima()) / 100;
+	int saudePerc = (e->getSaude() * 100) / e->getSaudeMaxima();
+	int custo = 0;
+
+	if (e->getId() == ID_CASTELO) {
+		custo = (40 * (100 - saudePerc)) / 100;
+	}
+	else {
+		custo = (e->getCusto() * (100 - saudePerc)) / 100;
+	}
 
 	if (moedas - custo < 0)
 		return 2;
 
+	moedas -= custo;
+	e->aumentaSaude(e->getSaudeMaxima());
 	return 6;
 }
 
@@ -428,7 +501,7 @@ int Colonia::venderEdificio(int eid) {
 		return -1;;
 
 	if (e->getId() == ID_CASTELO)
-		return 12;
+		return 37;
 
 	moedas += (e->getCusto() * e->getNumUpgrades()) / 2;
 	removeEdificios(e->getX(), e->getY());
@@ -438,11 +511,7 @@ int Colonia::venderEdificio(int eid) {
 void Colonia::elimina(){
 	vector<Ser*> copiaS = seres;
 	for (Ser *s : copiaS)
-		s->verificaSaude(this);
-	
-	vector<Ser*> copiaP = parias;
-	for (Ser *s : copiaP)
-		s->verificaSaude(this);
+		s->verificaSaude(this, nullptr);
 
 	vector<Edificio*> copiaE = edificios;
 	for (Edificio *e : copiaE)

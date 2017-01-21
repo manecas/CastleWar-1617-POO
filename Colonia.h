@@ -16,11 +16,10 @@ class Perfil;
 class Colonia {
 	int moedas;
 	char letra;
-	bool recolheu;
+	bool modoAtaque; //Recolher & Atacar
 	static int incrementaCor;
 	int cor;
 	vector<Ser*> seres; //Ponteiro porque os varios seres não cabem num vector<Ser>
-	vector<Ser*> parias;
 	vector<Edificio*> edificios; //Ponteiro porque os varios edificios não cabem num vector<Edificio>
 
 	bool verificaInterseccaoCastelo(int xNovo, int yNovo, Planicie * p)const;
@@ -33,20 +32,15 @@ public:
 	Colonia & operator=(const Colonia & ob);
 	virtual ~Colonia();
 	bool addSer(Ser * s);
-	bool addParia(Ser * s);
-	void removeParias(int x, int y);
 	void removeSeres(int x, int y);
 	bool addEdificio(Edificio * e);
-	bool mandouRecolher()const;
-	void setMandouRecolher(bool mandouR);
+	bool estaEmModoAtaque()const;
 	Edificio * pesquisaEdificioPorEid(int eid)const;
 	Edificio * pesquisaEdificioPorTipo(int id)const; //Atencao nome
 	Ser * pesquisaSerPorIndice(int indice)const; //Atencao nome
-	Ser * pesquisaPariaPorIndice(int indice)const; //Atencao nome
 	Edificio * pesquisaEdificioPorIndice(int indice)const;
 	static void reiniciaCor();
 	int pesquisaSer(int x, int y)const;
-	int pesquisaParia(int x, int y)const;
 	int pesquisaEdificio(int x, int y)const;
 	void removeEdificios(int x, int y);
 	int getMoedas()const;
@@ -54,21 +48,29 @@ public:
 	char getLetra()const;
 	int getCor()const;
 
-	void getPosicoesAdjacentes(vector<Posicao> & pos, int x, int y, Planicie * p);
+	bool verificaMovimentoSerXY(int xDest, int yDest);
+	bool atacaSeresEdificiosAdjacentes(int x, int y, int forcaAta, Colonia * c);
+	bool atacaSeresAdjacentes(int x, int y, int forcaAta, Colonia * c);
+	bool atacaEdificiosAdjacentes(int x, int y, int forcaAta, Colonia * c);
+	bool getPosicoesAdjacentes(int x, int y, vector<Posicao> & pos);
+	void getSeresInimigos(vector<Ser*> & inimigos, Colonia * c);
+	void getEdificiosInimigos(vector<Edificio*> & inimigos, Colonia * c);
 
 	void getSeres(vector<Ser*> & ss);
 	void getEdificios(vector<Edificio*> & ee);
 
-	int fabricaSeres(int num, Perfil * p);
+	int fabricaSeres(int num, Perfil * p, Planicie * planicie);
 	int constroiEdificio(int id, int lin, int col, Planicie * p, bool debug);
 
-	bool mudaCastelo(int x, int y, Planicie * p);
+	int mudaCastelo(int x, int y, Planicie * p);
 	void atuaAtaqueEdificio(Planicie * p);
 	void atuaAtaqueSer(Planicie * p);
 	int reparaEdificio(int eid);
 	int updgradeEdificio(int eid);
 	int venderEdificio(int eid);
 	void elimina();
+	int setModoRecolhe();
+	int setModoAtaque();
 
 	string toString()const;
 };

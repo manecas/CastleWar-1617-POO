@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Caracteristica" Collapsed="true">
+    <Position X="22.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AwCAIAAAAAAAAgAAAACABQgAAAAIQBIAAAQIAAAgIhg=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Bandeira" Collapsed="true">
+    <Position X="24.5" Y="9.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAACAAAgAAAAAAAKAAAQAAACAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Superior" Collapsed="true">
+    <Position X="21.75" Y="11.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAgAAAACAAAgAAAAAAAIAAAQQAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PeleDura" Collapsed="true">
+    <Position X="20" Y="10.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAgAIAACAAAgAAAAAAAIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Armadura" Collapsed="true">
+    <Position X="23" Y="10.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAgAAAACAAAgAAAAAAAIAAIQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Faca" Collapsed="true">
+    <Position X="26" Y="10.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAADAAAgAAAAAAIIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Espada" Collapsed="true">
+    <Position X="21.5" Y="9.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAgAAAACAAAgAAgAAAIIAAAQAAAAAABg=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Agressao" Collapsed="true">
+    <Position X="26" Y="9.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAADAIAgAAAAAAAIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Ecologico" Collapsed="true">
+    <Position X="23.25" Y="11.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAACAIAgAAAAAAAIAAAYAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HeatSeeker" Collapsed="true">
+    <Position X="21.5" Y="10.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAACAAkgAAAAAAAIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BuildSeeker" Collapsed="true">
+    <Position X="24.5" Y="10.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAACABggAAAAAAAIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Walker" Collapsed="true">
+    <Position X="20" Y="9.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAACAAggAAAAEAAIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Remedio" Collapsed="true" HideInheritanceLine="true">
+    <Position X="23" Y="9.75" Width="1.25" />
+    <InheritanceLine Type="Caracteristica" IsHidden="true" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgIAAACAAAgAAAAAAAIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SecondChance" Collapsed="true" HideInheritanceLine="true">
+    <Position X="20.25" Y="11.75" Width="1.25" />
+    <InheritanceLine Type="Caracteristica" IsHidden="true" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAACAACgAAAAAIAIAAAQAAAAAABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Aluno" Collapsed="true" HideInheritanceLine="true">
+    <Position X="24.75" Y="11.75" Width="1.25" />
+    <InheritanceLine Type="Caracteristica" IsHidden="true" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAASAACgAAAAAAAIAAAQAAAABABA=</HashCode>
+      <FileName>Caracteristica.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Colonia" Collapsed="true">
+    <Position X="23.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ogBCIEQIMQEAYCUIBASQBQlKBCCAFpBIIcAgAAkAABQ=</HashCode>
+      <FileName>Colonia.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Consola" Collapsed="true">
+    <Position X="27.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ggAoBAAAASgAAAiQgAQABQQgAAIAUgACAAAxAAwEMDY=</HashCode>
+      <FileName>Consola.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Edificio" Collapsed="true">
+    <Position X="25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BxIAAAgAABAIIgCkAADOBAAAIgACQhIAIAZiAGAAwhA=</HashCode>
+      <FileName>Edificio.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Castelo" Collapsed="true">
+    <Position X="24.25" Y="7.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAACAQAAAIAAAAgAAAAAAAAAAABA=</HashCode>
+      <FileName>Edificio.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Torre" Collapsed="true">
+    <Position X="25.75" Y="7.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAgAAAACAJAAAIAAAAoAAAAAAAAAAABA=</HashCode>
+      <FileName>Edificio.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Quinta" Collapsed="true">
+    <Position X="27.25" Y="7.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAABAAAAgAAAACABAAAIAAAAgAAAIAAAAAAABA=</HashCode>
+      <FileName>Edificio.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FabricaCaracteristicas" Collapsed="true">
+    <Position X="25.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>FabricaCaracteristicas.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FabricaEdificios" Collapsed="true">
+    <Position X="27.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>FabricaEdificios.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Interface" Collapsed="true">
+    <Position X="23.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAYAIEAAIAQCAAMAADAAAQUIAAACABQOQBgBAAAZQA=</HashCode>
+      <FileName>Interface.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perfil" Collapsed="true">
+    <Position X="22.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAQAAAACAEEQQAIBAACAABAAQQCAEQgABFAAAA=</HashCode>
+      <FileName>Perfil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Planicie" Collapsed="true">
+    <Position X="23.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAGACAgMkEVcqQJRASkEMBYAADADjFOQQEhACBgEig=</HashCode>
+      <FileName>Planicie.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Posicao" Collapsed="true">
+    <Position X="25.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAACAAQAAAAAAAAGAAEAAAAAAAAAAABgAGBAAAA=</HashCode>
+      <FileName>Posicao.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Ser" Collapsed="true">
+    <Position X="22.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAIAAAgACKABDoAkQAhGhgBAQgFEAYACIAZgAGAAQAA=</HashCode>
+      <FileName>Ser.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

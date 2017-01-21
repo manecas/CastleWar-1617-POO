@@ -1,22 +1,20 @@
 #include "Ser.h"
 #include "Colonia.h"
+#include "Planicie.h"
 
 #include <sstream>
 
 using std::ostringstream;
 
 //--------------------------SER-----------------------------------------
-Ser::Ser(const Perfil & p):saude(10), saudeMaxima(10), perfil(p), 
-entrouCastelo(true), numAtaques(0) {
-	
+Ser::Ser(const Perfil & p): saudeMaxima(10), perfil(p), numAtaques(0) {
+	ataque += p.getTotalAtaque();
+	defesa += p.getTotalDefesa();
+	saudeMaxima += p.getSaudeMaxima();
+	saude = saudeMaxima;
 }
 
-void Ser::atua(Colonia * c, Planicie * p) {
-	perfil.atua(this, c, p);
-
-	//if (c == nullptr)
-	//	return;
-}
+void Ser::atua(Colonia * c, Planicie * p) { perfil.atua(this, c, p); }
 
 Ser * Ser::duplica() const{ return new Ser(*this); }
 
@@ -24,26 +22,20 @@ int Ser::getTotalPreco() const{ return perfil.getTotalPreco(); }
 
 int Ser::getSaude() const { return saude; }
 
-int Ser::getSaudeMaxima() const { return saudeMaxima + perfil.getSaudeMaxima(); }
+int Ser::getSaudeMaxima() const { return saudeMaxima; }
 
 int Ser::getNumAtaques() const { return numAtaques; }
 
 char Ser::getLetraPerfil() const { return perfil.getLetra(); }
 
-bool Ser::getEntrouCastelo() const { return entrouCastelo; }
+void Ser::reiniciaCaracteristicas(){ perfil.reiniciaCaracteristicas(); }
 
-void Ser::setEntrouCastelo(bool val) { entrouCastelo = val; }
-
-void Ser::mandarRecolher(Colonia * c){
-
-}
-
-void Ser::verificaSaude(Colonia * c){
-	if (c == nullptr)
-		return;
-
+void Ser::verificaSaude(Colonia * c, Planicie * p){
 	if (saude == 0) {
-		c->removeSeres(x, y);
+		if (c != nullptr)
+			c->removeSeres(x, y);
+		else if(p != nullptr)
+			p->removeParias(x, y);
 	}
 }
 
@@ -67,28 +59,22 @@ int Ser::getTotalDefesa() const { return defesa; }
 
 int Ser::getTotalVelocidade() const { return velocidade; }
 
-void Ser::aumentaSaude(int s){
-	if (saude + s >= saudeMaxima) {
-		saude = saudeMaxima;
-		return;
-	}
-	saude += s;
-}
-
 void Ser::aumentaSaudeMaxima(int saudeMax){ saudeMaxima += saudeMax; }
 
-void Ser::aumentaNumAtaques(int num){ 
-	if (numAtaques + num == 3) {
-		numAtaques = 0;
-		return;
-	}
-
-	numAtaques += num; 
-}
+void Ser::aumentaNumAtaques(int num){ numAtaques += num; }
 
 void Ser::setY(int yy){ y = yy; }
 
 void Ser::setX(int xx) { x = xx; }
+
+void Ser::setNumAtaques(int ataques){
+	if (ataques < 0) {
+		numAtaques = 0;
+		return;
+	}
+
+	numAtaques = ataques;
+}
 
 void Ser::setAtaque(int at){ ataque = at; }
 
@@ -101,6 +87,27 @@ void Ser::recebeAtaque(int forcaAtaque){
 	else
 		diminuiSaude(1);
 
+}
+
+void Ser::aumentaDefesa(int d) { defesa += d; }
+
+void Ser::diminuiAtaque(int a){
+	if (ataque - a < 0) {
+		ataque = 0;
+		return;
+	}
+
+	ataque -= a;
+}
+
+void Ser::aumentaAtaque(int a) { ataque += a; }
+
+void Ser::aumentaSaude(int s) {
+	if (saude + s >= saudeMaxima) {
+		saude = saudeMaxima;
+		return;
+	}
+	saude += s;
 }
 
 void Ser::diminuiSaude(int s){

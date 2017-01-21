@@ -9,8 +9,8 @@
 #include <locale.h>
 #include <cstdlib> //Ver isto
 #include <vector>
-#include "Constantes.h"
 #include "Erros.h"
+#include "Constantes.h"
 
 using std::string;
 using std::istringstream;
@@ -21,8 +21,8 @@ using std::ifstream;
 using std::stoi;
 using std::vector;
 
-using namespace Constantes;
 using namespace Erros;
+using namespace Constantes;
 
 class Planicie;
 
@@ -33,6 +33,7 @@ class Interface {
 	bool definiuDimensao;
 	int x, y; //Foco do utilizador
 	string erro;
+	bool usarEid;
 	bool fimJogo;
 
 public:
@@ -47,7 +48,10 @@ public:
 	void interpretaLinha(string linha);
 	bool lerComandosDeFicheiroDeTexto(string nomeFicheiro);
 
+	void desenhaRetanguloVazio(int x, int y, int lin, int col)const;
 	void listaCaracteristicas()const;
+	void listaComandosConfiguracao()const;
+	void listaParias()const;
 	void listaCaracteristicasPerfilColonias();
 	void listaCaracteristicasPerfil(); //Todos os perfis
 	void listaCaracteristicasPerfil(char letra); //Por letra
@@ -58,7 +62,7 @@ public:
 	void desenhaPlanicie(int x, int y, int lin, int col)const;
 	void desenhaSeresEdificios(int x, int y, int lin, int col)const;
 
-	void imprimeErros(int codigo);
+	void imprimeMensagens(int codigo);
 
 	void iniciaJogo();
 	void configuraJogo();

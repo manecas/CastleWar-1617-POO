@@ -18,25 +18,6 @@ Edificio::Edificio(string n, int c, int s, int d, int xx, int yy, int id, int sa
 	nome(n), custo(c), saude(s), defesa(d), x(xx), y(yy), eid(contador++), 
 	id(id), saudeMaxima(saudeM), custoUpgrade(custoUpgrade), numUpgrades(numUpgrades){ }
 
-//Edificio::Edificio(const Edificio & ob) { *this = ob; }
-//
-//Edificio & Edificio::operator=(const Edificio & ob){
-//	if (this == &ob)
-//		return *this;
-//
-//	contador = ob.contador;
-//	eid = ob.eid;
-//	nome = ob.nome;
-//	id = ob.id;
-//	custo = ob.custo;
-//	saude = ob.saude;
-//	defesa = ob.defesa;
-//	x = ob.x;
-//	y = ob.y;
-//
-//	return *this;
-//}
-
 string Edificio::getNome() const{ return nome; }
 
 int Edificio::getId() const { return id; }
@@ -117,12 +98,12 @@ void Edificio::setX(int xx) { x = xx; }
 
 //-----------------CASTELO---------------------------
 Castelo::Castelo(int xx, int yy, int id) 
-	: Edificio("Castelo", 0, 50, 10, xx, yy, id, 50, 0, 0) { }
+	: Edificio("Castelo", 0, 50, 10, xx, yy, id, 50, 0, 1) { }
 
 //Retorna um inteiro consoante o erro
-int Castelo::fabricaSeres(Colonia * c, int num, Perfil * p){
+int Castelo::fabricaSeres(Colonia * c, int num, Perfil * p, Planicie * planicie){
 
-	if (p == nullptr)
+	if (p == nullptr || planicie == nullptr)
 		return -1;
 
 	if (num <= 0)
@@ -146,7 +127,7 @@ int Castelo::fabricaSeres(Colonia * c, int num, Perfil * p){
 		if (p->bandeiraExiste())
 			c->addSer(s);
 		else
-			c->addParia(s);
+			planicie->addParia(s);
 	}
 
 	c->setMoedas(c->getMoedas() - (p->getTotalPreco() * num));
@@ -163,7 +144,7 @@ Edificio * Castelo::duplica() const { return new Castelo(*this); }
 
 //------------------TORRE-----------------------------
 Torre::Torre(int xx, int yy, int id)
-	:Edificio("Torre", 30, 20, 10, xx, yy, id, 20, 10, 0), ataque(3), distAtaque(2){ }
+	:Edificio("Torre", 30, 20, 10, xx, yy, id, 20, 10, 1), ataque(3), distAtaque(2){ }
 
 int Torre::getAtaque() const { return ataque; }
 
@@ -196,35 +177,13 @@ void Torre::efeito(Colonia * c, Planicie * p){
 	int x = getX();
 	int y = getY();
 
-	for (int k = 0; k < p->getNumColonias(); k++){
-		Colonia *col = p->pesquisaColonia(k);
-		if (col == nullptr)
-			return;
-
-		if (col != c) {
-			for (int i = y - distAtaque; i <= y + distAtaque; i++) { //Linhas
-				for (int j = x - distAtaque; j <= x + distAtaque; j++) { //Colunas
-					if (i == y && j == x)
-						continue;
-					else {
-						if (p->verificaLimitePlanicie(j, i)) {
-							int posS = col->pesquisaSer(j, i);
-							int posE = col->pesquisaEdificio(j, i);
-							if (posS != -1) {
-								Ser * s = col->pesquisaSerPorIndice(posS);
-								if (s == nullptr)
-									return;
-								s->recebeAtaque(ataque);
-							}
-							else if (posE != -1) {
-								Edificio *e = col->pesquisaEdificioPorIndice(posE);
-								if (e == nullptr)
-									return;
-								e->recebeAtaque(ataque);
-							}
-						}
-					}
-				}
+	for (int i = y - distAtaque; i <= y + distAtaque; i++) { //Linhas
+		for (int j = x - distAtaque; j <= x + distAtaque; j++) { //Colunas
+			if (i == y && j == x)
+				continue;
+			else {
+				if (p->atacaSeresEdificiosAdjacentes(j, i, ataque, c))
+					return;
 			}
 		}
 	}
@@ -233,11 +192,11 @@ void Torre::efeito(Colonia * c, Planicie * p){
 
 Edificio * Torre::duplica() const { return new Torre(*this); }
 
-int Torre::fabricaSeres(Colonia * c, int num, Perfil * p){ return 4; }
+int Torre::fabricaSeres(Colonia * c, int num, Perfil * p, Planicie * planicie){ return 4; }
 
 //-------------------QUINTA-------------------------
 Quinta::Quinta(int xx, int yy, int id)
-:Edificio("Quinta", 20, 20, 10, xx ,yy, id, 20, 10, 0), moedas(2){ }
+:Edificio("Quinta", 20, 20, 10, xx ,yy, id, 20, 10, 1), moedas(2){ }
 
 int Quinta::getMoedas() const{ return moedas; }
 
@@ -272,7 +231,7 @@ void Quinta::efeito(Colonia * c, Planicie * p){
 
 Edificio * Quinta::duplica() const { return new Quinta(*this); }
 
-int Quinta::fabricaSeres(Colonia * c, int num, Perfil * p) { return 4; }
+int Quinta::fabricaSeres(Colonia * c, int num, Perfil * p, Planicie * planicie) { return 4; }
 
 int Quinta::getAtaque() const { return 0; }
 

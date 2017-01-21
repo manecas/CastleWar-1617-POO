@@ -27,8 +27,6 @@ class Edificio {
 public:
 	Edificio(string n, int c, int s, int d, int xx, int yy, int id, int saudeM, 
 		int custoUpgrade, int numUpgrades);
-	/*Edificio(const Edificio & ob);
-	Edificio & operator=(const Edificio & ob);*/
 	string getNome()const;
 	int getId()const;
 	int getCusto()const;
@@ -57,7 +55,7 @@ public:
 	virtual void efeito(Colonia * c, Planicie * p) = 0;
 	virtual void verificaDestruicao(Colonia * c);
 	virtual Edificio * duplica()const = 0;
-	virtual int fabricaSeres(Colonia * c, int num, Perfil * p) = 0;
+	virtual int fabricaSeres(Colonia * c, int num, Perfil * p, Planicie * planicie) = 0;
 };
 
 //CASTELO
@@ -67,7 +65,7 @@ public:
 	virtual int upgrade(Colonia * c);
 	virtual void efeito(Colonia * c, Planicie * p);
 	virtual Edificio * duplica()const;
-	virtual int fabricaSeres(Colonia * c, int num, Perfil * p);
+	virtual int fabricaSeres(Colonia * c, int num, Perfil * p, Planicie * planicie);
 	virtual int getAtaque()const;
 };
 
@@ -81,7 +79,7 @@ public:
 	virtual int upgrade(Colonia * c);
 	virtual void efeito(Colonia * c, Planicie * p);
 	virtual Edificio * duplica()const;
-	virtual int fabricaSeres(Colonia * c, int num, Perfil * p);
+	virtual int fabricaSeres(Colonia * c, int num, Perfil * p, Planicie * planicie);
 	virtual int getAtaque()const;
 };
 
@@ -95,7 +93,7 @@ public:
 	virtual int upgrade(Colonia * c);
 	virtual void efeito(Colonia * c, Planicie * p);
 	virtual Edificio * duplica()const;
-	virtual int fabricaSeres(Colonia * c, int num, Perfil * p);
+	virtual int fabricaSeres(Colonia * c, int num, Perfil * p, Planicie * planicie);
 	virtual int getAtaque()const;
 };
 

@@ -6,14 +6,19 @@
 #include "Edificio.h"
 #include "Ser.h"
 #include "Colonia.h"
-#include "Constantes.h"
-
-using namespace Constantes;
 
 Interface::Interface() : iniciouJogo(false), definiuDimensao(false), x(0), y(0), 
-erro(""), fimJogo(false) { }
+erro(""), fimJogo(false), usarEid(true) { }
 
-Interface::~Interface() { /*delete planicie;*/ }
+Interface::~Interface() { 
+	if(planicie != nullptr)
+		delete planicie;
+
+	for (unsigned i = 0; i < jogosGuardados.size(); i++) {
+		delete jogosGuardados[i];
+	}
+	jogosGuardados.clear();
+}
 
 int Interface::guardaJogo(string nome){
 	
@@ -86,9 +91,10 @@ void Interface::interpretaLinha(string linha) {
 				if (planicie == nullptr)
 					return;
 				definiuDimensao = true;
+				resultado = 22;
 			}
 			else {
-				erro = "Tens de primeiro definir a dimensao da planicie!";
+				resultado = 23;
 			}
 		}
 		else { //Ja definiu dimensoes
@@ -97,14 +103,14 @@ void Interface::interpretaLinha(string linha) {
 				in >> moedas;
 				if (!in)
 					return;
-				planicie->setMoedas(moedas);
+				resultado = planicie->setMoedas(moedas);
 			}
 			else if (comando == "oponentes") {
 				int num;
 				in >> num;
 				if (!in)
 					return;
-				planicie->addColonias(num);
+				resultado = planicie->addColonias(num);
 			}
 			else if (comando == "castelo") {
 				char letraCol;
@@ -112,14 +118,14 @@ void Interface::interpretaLinha(string linha) {
 				in >> letraCol >> lin >> col;
 				if (!in)
 					return;
-				planicie->mudaCastelo(letraCol, lin, col);
+				resultado = planicie->mudaCastelo(letraCol, lin, col);
 			}
 			else if (comando == "mkperfil") {
 				char letraPerfil;
 				in >> letraPerfil;
 				if (!in)
 					return;
-				planicie->criaPerfil(letraPerfil);
+				resultado = planicie->criaPerfil(letraPerfil);
 			}
 			else if (comando == "addperfil") {
 				char letraPerfil;
@@ -127,7 +133,7 @@ void Interface::interpretaLinha(string linha) {
 				in >> letraPerfil >> idCarac;
 				if (!in)
 					return;
-				planicie->addCaracteristica(idCarac, letraPerfil);
+				resultado = planicie->addCaracteristica(idCarac, letraPerfil);
 			}
 			else if (comando == "subperfil") {
 				char letraPerfil;
@@ -135,22 +141,22 @@ void Interface::interpretaLinha(string linha) {
 				in >> letraPerfil >> idCarac;
 				if (!in)
 					return;
-				planicie->removeCaracteristica(idCarac, letraPerfil);
+				resultado = planicie->removeCaracteristica(idCarac, letraPerfil);
 			}
 			else if (comando == "rmperfil") {
 				char letraPerfil;
 				in >> letraPerfil;
 				if (!in)
 					return;
-				planicie->removePerfil(letraPerfil);
+				resultado = planicie->removePerfil(letraPerfil);
 			}
 			else if (comando == "inicio") {
 				iniciouJogo = true; //Aqui sabemos que ja comecou o jogo
+				planicie->sortearPerfisComputador();
 				iniciaJogo();
 			}
 			else {
-				erro = "Comando errado!";
-				return;
+				resultado = 101;
 			}
 		}
 	}
@@ -158,14 +164,16 @@ void Interface::interpretaLinha(string linha) {
 		if (comando == "next") {
 			int num;
 			in >> num;
-			if (!in)
-				planicie->aumentaInstantes(1);
-			else
-				planicie->aumentaInstantes(num);
-			//Os computadores vao fazer as suas jogadas
-			//planicie->incrementaVezJogada();
-			//Funcao que vai mandar todos os comandos
-			planicie->atua();
+			if (!in) {
+				planicie->sortearComandoComputador();
+				resultado = planicie->atua();
+			}
+			else {
+				for (int i = 0; i < num; i++){
+					planicie->sortearComandoComputador();
+					resultado = planicie->atua();
+				}
+			}
 		}
 		else if(comando == "ser") {
 			int num;
@@ -182,6 +190,7 @@ void Interface::interpretaLinha(string linha) {
 				return;
 			this->x = x;
 			this->y = y;
+			resultado = 36;
 		}
 		else if (comando == "build") {
 			int id, x, y;
@@ -212,6 +221,15 @@ void Interface::interpretaLinha(string linha) {
 			if (!in)
 				return;
 			listaCaracteristicasPerfil(letra);
+		}
+		else if (comando == "changecarac") {
+			if (usarEid)
+				usarEid = false;
+			else
+				usarEid = true;
+		}
+		else if (comando == "listparias") {
+			listaParias();
 		}
 		else if (comando == "listallp") {
 			listaCaracteristicasPerfilColonias();
@@ -265,6 +283,12 @@ void Interface::interpretaLinha(string linha) {
 				return;
 			resultado = apagaJogoGuardado(nome);
 		}
+		else if (comando == "ataca") {
+			resultado = planicie->setModoAtaque();
+		}
+		else if (comando == "recolhe") {
+			resultado = planicie->setModoRecolhe();
+		}
 		else if (comando == "fim") {
 			iniciouJogo = false;
 			definiuDimensao = false;
@@ -279,8 +303,11 @@ void Interface::interpretaLinha(string linha) {
 			}
 			fimJogo = true;
 		}
+		else {
+			resultado = 101;
+		}
 	}
-	imprimeErros(resultado);
+	imprimeMensagens(resultado);
 }
 
 bool Interface::lerComandosDeFicheiroDeTexto(string nomeFicheiro) {
@@ -305,58 +332,169 @@ bool Interface::lerComandosDeFicheiroDeTexto(string nomeFicheiro) {
 	return true;
 }
 
-void Interface::listaCaracteristicas()const {
-	Consola::gotoxy(110, 1);
-	cout << "Id" << "    Nome" << "     Custo Monetário" << "     Custo Força";
-	Consola::gotoxy(110, 2);
-	cout << "1" << "   Bandeira" << "         1" << "                  0";
-	Consola::gotoxy(110, 3);
-	cout << "2" << "   Superior" << "         1" << "                  1";
-	Consola::gotoxy(110, 4);
-	cout << "3" << "   PeleDura" << "         2" << "                  2";
-	Consola::gotoxy(110, 5);
-	cout << "4" << "   Armadura" << "         2" << "                  3";
-	Consola::gotoxy(110, 6);
-	cout << "5" << "   Faca" << "             1" << "                  1";
-	Consola::gotoxy(110, 7);
-	cout << "6" << "   Espada" << "           2" << "                  2";
-	Consola::gotoxy(110, 8);
-	cout << "7" << "   Agressao" << "         1" << "                  1";
-	Consola::gotoxy(110, 9);
-	cout << "8" << "   Ecologico" << "        1" << "                  1";
-	Consola::gotoxy(110, 10);
-	cout << "9" << "   HeatSeeker" << "       1" << "                  1";
-	Consola::gotoxy(110, 11);
-	cout << "10" << "  BuildSeeker" << "      1" << "                  1";
-	Consola::gotoxy(110, 12);
-	cout << "11" << "  Walker" << "           1" << "                  1";
-	Consola::gotoxy(110, 13);
-	cout << "12" << "  Remedio" << "          2" << "                  1";
-	Consola::gotoxy(110, 14);
-	cout << "13" << "  SecondChance" << "     3" << "                  0";
-	Consola::gotoxy(110, 15);
-	cout << "14" << "  Aluno" << "            ?" << "                  ?";
+void Interface::desenhaRetanguloVazio(int x, int y, int lin, int col)const{
+
+	for (int i = y; i <= lin; i++) {
+		for (int j = x; j <= col; j++) {
+			Consola::gotoxy(j, i);
+			if (i == y || i == lin)
+				cout << char(205);
+			else if (j == x || j == col)
+				cout << char(186);
+
+			Consola::gotoxy(j, i);
+			if (i == y && j == x)
+				cout << char(201);
+			else if (i == y && j == col)
+				cout << char(187);
+			else if (i == lin && j == col)
+				cout << char(188);
+			else if (i == lin && j == x)
+				cout << char(200);
+		}
+	}
 }
 
-//Por fazer...
-void Interface::listaCaracteristicasPerfilColonias(){
-	//vector<Perfil*> p;
-	//vector<Caracteristica*> c;
-	//planicie->getPerfis(p);
-	//int k = 1;
-	////Percorrer o vector de perfis
-	//for (unsigned int i = 0; i < p.size(); i++, k += 15) {
-	//	Consola::gotoxy(k, 1);
-	//	cout << "Perfil '" << p[i]->getLetra() << "'";
+void Interface::listaCaracteristicas()const {
+	Consola::gotoxy(110, 2);
+	cout << "CARACTERISTICAS";
+	Consola::gotoxy(82, 4);
+	cout << "Id" << "    Nome" << "     $(In-game)" << "  $(Forca)";
+	Consola::gotoxy(82, 5);
+	cout << "1" << "   Bandeira" << "       1" << "          0";
+	Consola::gotoxy(82, 6);
+	cout << "2" << "   Superior" << "       1" << "          1" << "   +1 SaudeM";
+	Consola::gotoxy(82, 7);
+	cout << "3" << "   PeleDura" << "       2" << "          2" << "   +1 Defesa";
+	Consola::gotoxy(82, 8);
+	cout << "4" << "   Armadura" << "       2" << "          3" << "   +2 Defesa";
+	Consola::gotoxy(82, 9);
+	cout << "5" << "   Faca" << "           1" << "          1" << "   +1 Ataque";
+	Consola::gotoxy(82, 10);
+	cout << "6" << "   Espada" << "         2" << "          2" << "   +2 Ataque  +1 nos dois primeiros Ataques";
+	Consola::gotoxy(82, 11);
+	cout << "7" << "   Agressao" << "       1" << "          1" << "   Ataca seres inimigos";
+	Consola::gotoxy(82, 12);
+	cout << "8" << "   Ecologico" << "      1" << "          1" << "   Ataca edificios inimigos";
+	Consola::gotoxy(82, 13);
+	cout << "9" << "   HeatSeeker" << "     1" << "          1" << "   Procura ser inigimo mais proximo";
+	Consola::gotoxy(82, 14);
+	cout << "10" << "  BuildSeeker" << "    1" << "          1" << "   Procura edificio inigimo mais proximo";
+	Consola::gotoxy(82, 15);
+	cout << "11" << "  Walker" << "         1" << "          1" << "   Anda ao calhas";
+	Consola::gotoxy(82, 16);
+	cout << "12" << "  Remedio" << "        2" << "          1" << "   +2 Saude quando ser tem <= 3 Saude";
+	Consola::gotoxy(82, 17);
+	cout << "13" << "  SecondChance" << "   3" << "          0" << "   Segunda vida quando morre";
+	Consola::gotoxy(82, 18);
+	cout << "14" << "  Aluno" << "          10" << "         4" << "   Tem 3 vidas. Quando morre +5(A) e +5(Def)";
 
-	//	p[i]->getCaracteristicas(c);
-	//	//Para cada perfil percorrer o vector das suas caracteristicas
-	//	for (unsigned int j = 0; j < c.size(); j++) {
-	//		Consola::gotoxy(k, j + 3);
-	//		cout << c[j]->getNome();
-	//	}
-	//	c.clear();
-	//}
+	desenhaRetanguloVazio(80, 0, 20, 159);
+}
+
+void Interface::listaComandosConfiguracao() const{
+	Consola::gotoxy(95, 23);
+	cout << "COMANDOS";
+	Consola::gotoxy(82, 25);
+	cout << "dim linhas colunas ";
+	Consola::gotoxy(82, 26);
+	cout << "moedas numero";
+	Consola::gotoxy(82, 27);
+	cout << "dim linhas colunas";
+	Consola::gotoxy(82, 28);
+	cout << "castelo colonia lin col";
+	Consola::gotoxy(82, 29);
+	cout << "mkperfil letra";
+	Consola::gotoxy(82, 30);
+	cout << "addperfil letra caracteristica(id)";
+	Consola::gotoxy(82, 31);
+	cout << "subperfil letra caracteristica(id)";
+	Consola::gotoxy(82, 32);
+	cout << "rmperfil letra";
+	Consola::gotoxy(82, 33);
+	cout << "load ficheiro(nome)";
+
+	desenhaRetanguloVazio(80, 21, 35, 121);
+}
+
+void Interface::listaParias() const{
+
+	limpa();
+	vector<Ser*> s;
+	planicie->getParias(s);
+	Consola::gotoxy(65, 1);
+	cout << "      PARIAS";
+	Consola::gotoxy(60, 3);
+	cout << "Per  C   (x,y)  S    SM   A   D";
+	int k = 1;
+	for (unsigned int i = 0; i < s.size(); i++, k += 1) {
+		Consola::gotoxy(60, k + 5);
+		cout << "'" << s[i]->getLetraPerfil() << "' ";
+		cout << "'" << s[i]->getTotalPreco() << "' ";
+		cout << "(" << s[i]->getX() << "," << s[i]->getY() << ") ";
+		cout << "'" << s[i]->getSaude() << "' ";
+		cout << "'" << s[i]->getSaudeMaxima() << "' ";
+		cout << "'" << s[i]->getTotalAtaque() << "' ";
+		cout << "'" << s[i]->getTotalDefesa() << "' ";
+	}
+}
+
+void Interface::listaCaracteristicasPerfilColonias(){
+
+	limpa();
+	vector<Perfil*> p;
+	vector<Caracteristica*> c;
+	planicie->getPerfis(p);
+
+	Consola::gotoxy(105, 1);
+	cout << "PERFIS JOGADOR";
+	int k = 70;
+	//Percorrer o vector de perfis
+	for (unsigned int i = 0; i < p.size(); i++, k += 17) {
+		Consola::gotoxy(k, 3);
+		cout << "Perfil '" << p[i]->getLetra() << "'";
+		Consola::gotoxy(k - 2, 5);
+		cout << "A(" << p[i]->getTotalAtaque() << ") ";
+		cout << "D(" << p[i]->getTotalDefesa() << ") ";
+		cout << "V(" << p[i]->getTotalVelocidade() <<") ";
+		Consola::gotoxy(k, 6);
+		cout << "SM(" << p[i]->getSaudeMaxima() << ") ";
+		cout << "C(" << p[i]->getTotalPreco() << ")";
+		p[i]->getCaracteristicas(c);
+		//Para cada perfil percorrer o vector das suas caracteristicas
+		for (unsigned int j = 0; j < c.size(); j++) {
+			Consola::gotoxy(k, j + 8);
+			cout << c[j]->getNome();
+		}
+		c.clear();
+	}
+	desenhaRetanguloVazio(65, 0, 19, 155);
+
+	p.clear();
+	planicie->getPerfisComputador(p);
+	Consola::gotoxy(105, 21);
+	cout << "PERFIS COMPUTADOR";
+	k = 70;
+	//Percorrer o vector de perfis
+	for (unsigned int i = 0; i < p.size(); i++, k += 17) {
+		Consola::gotoxy(k, 23);
+		cout << "Perfil '" << p[i]->getLetra() << "'";
+		Consola::gotoxy(k - 2, 25);
+		cout << "A(" << p[i]->getTotalAtaque() << ") ";
+		cout << "D(" << p[i]->getTotalDefesa() << ") ";
+		cout << "V(" << p[i]->getTotalVelocidade() << ") ";
+		Consola::gotoxy(k, 26);
+		cout << "SM(" << p[i]->getSaudeMaxima() << ") ";
+		cout << "C(" << p[i]->getTotalPreco() << ")";
+		p[i]->getCaracteristicas(c);
+		//Para cada perfil percorrer o vector das suas caracteristicas
+		for (unsigned int j = 0; j < c.size(); j++) {
+			Consola::gotoxy(k, j + 28);
+			cout << c[j]->getNome();
+		}
+		c.clear();
+	}
+	desenhaRetanguloVazio(65, 20, 39, 155);
 }
 
 void Interface::listaCaracteristicasPerfil(){
@@ -364,6 +502,10 @@ void Interface::listaCaracteristicasPerfil(){
 	vector<Perfil*> p;
 	vector<Caracteristica*> c;
 	planicie->getPerfis(p);
+
+	if(p.size() != 0)
+		desenhaRetanguloVazio(0, 0, 15, 78);
+
 	int k = 1;
 	//Percorrer o vector de perfis
 	for (unsigned int i = 0; i < p.size(); i++, k += 15){
@@ -390,17 +532,18 @@ void Interface::listaCaracteristicasPerfil(char letra) {
 	p->getCaracteristicas(c);
 
 	//Percorrer o vector de perfis
-	Consola::gotoxy(135, 1);
+	Consola::gotoxy(120, 3);
 	cout << "Perfil '" << p->getLetra() << "'";
-	Consola::gotoxy(130, 3);
+	Consola::gotoxy(115, 5);
 	cout << "A(" << p->getTotalAtaque() << ") " <<
 		"D(" << p->getTotalDefesa() << ") " <<
 		"V(" << p->getTotalVelocidade() << ") " <<
+		"SM(" << p->getSaudeMaxima() << ") " <<
 		"C(" << p->getTotalPreco() << ")";
 
 	//Para cada perfil percorrer o vector das suas caracteristicas
 	for (unsigned int j = 0; j < c.size(); j++) {
-		Consola::gotoxy(135, j + 5);
+		Consola::gotoxy(120, j + 7);
 		cout << c[j]->getNome();
 	}
 }
@@ -418,7 +561,7 @@ void Interface::listaColonia(char letra){
 	Consola::gotoxy(65, 1);
 	cout << "      SERES";
 	Consola::gotoxy(60, 3);
-	cout << "Per  C  (x,y)  S   SM   A   D   V";
+	cout << "Per  C   (x,y)  S    SM   A   D";
 	int k = 5;
 	for (unsigned int i = 0; i < s.size(); i++, k+=1) {
 		Consola::gotoxy(60, k);
@@ -429,16 +572,15 @@ void Interface::listaColonia(char letra){
 		cout << "'" << s[i]->getSaudeMaxima() << "' ";
 		cout << "'" << s[i]->getTotalAtaque() << "' ";
 		cout << "'" << s[i]->getTotalDefesa() << "' ";
-		cout << "'" << s[i]->getTotalVelocidade() << "' ";
 	}
 
-	Consola::gotoxy(115, 1);
+	Consola::gotoxy(110, 1);
 	cout << "     EDIFICIOS";
-	Consola::gotoxy(110, 3);
+	Consola::gotoxy(100, 3);
 	cout << "EID   Nome     C  (x,y)  S    SM   A   D   C(UP)";
 	k = 5;
 	for (unsigned int i = 0; i < e.size(); i++, k += 1) {
-		Consola::gotoxy(110, k);
+		Consola::gotoxy(100, k);
 		cout << "'" << e[i]->getEid() << "' ";
 		cout << "'" << e[i]->getNome() << "' ";
 		cout << "'" << e[i]->getCusto() << "' ";
@@ -449,21 +591,34 @@ void Interface::listaColonia(char letra){
 		cout << "'" << e[i]->getDefesa() << "' ";
 		cout << "'" << e[i]->getCustoUpgrade() << "' ";
 	}
+
+	Consola::gotoxy(87, 38);
+	cout << " \t \t";
+	Consola::gotoxy(80, 38);
+	cout << "Moedas: " << c->getMoedas();
+	Consola::gotoxy(92, 39);
+	cout << " \t \t";
+	Consola::gotoxy(80, 39);
+	if (c->estaEmModoAtaque())
+		cout << "Modo: Ataque";
+	else
+		cout << "Modo: Recolha";
+
 }
 
 void Interface::listaCoordenadasCastelos() const{
 
-	Consola::gotoxy(1, 14);
-	cout << "Castelo" << "  Coordenada";
+	Consola::gotoxy(1, 17);
+	cout << "Castelo" << "  (x,y) / (col,lin)";
 	for (int i = 0; i < planicie->getNumColonias(); i++) {
-		Consola::gotoxy(2, i + 16);
+		Consola::gotoxy(2, i + 18);
 		cout << " '" << planicie->pesquisaColonia(i)->getLetra() << "'";
-		Consola::gotoxy(10, i + 16);
+		Consola::gotoxy(14, i + 18);
 		int x = planicie->pesquisaColonia(i)->pesquisaEdificioPorTipo(1)->getX();
 		int y = planicie->pesquisaColonia(i)->pesquisaEdificioPorTipo(1)->getY();
 		cout << "(" << x << "," << y << ")";
 	}
-
+	desenhaRetanguloVazio(0, 16, 33, 60);
 }
 
 void Interface::limpa() const{
@@ -477,38 +632,145 @@ void Interface::limpa() const{
 	}
 }
 
-void Interface::desenhaPlanicie(int x, int y, int lin, int col) const{
+void Interface::desenhaPlanicie(int x, int y, int lin, int col) const {
 
-	int c = 1;
+	Consola::gotoxy(18, 2);
+	cout << "MAPA DO JOGO";
 
-	for (int i = y; i <= lin + y; i++){
-		for (int j = x; j <= col + x; j++){
-			Consola::gotoxy(j, i);
-			if (c % 2 == 0) {
-				Consola::setBackgroundColor(Consola::BRANCO);
-				cout << " ";
+	for (int i = y; i <= lin + y; i++) {
+		for (int j = x; j <= col + x; j++) {
+			Consola::gotoxy(j - x + 4, i - y + 4);
+			if (planicie->verificaLimitePlanicie(j, i)) {
+				if (i % 2 == 0 && j % 2 == 0) {
+					Consola::setBackgroundColor(Consola::BRANCO);
+					cout << " ";
+				}
+				else if(i % 2 == 0 && j % 2 != 0){
+					Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+					cout << " ";
+				}
+				else if (i % 2 != 0 && j % 2 == 0) {
+					Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+					cout << " ";
+				}
+				else if (i % 2 != 0 && j % 2 != 0) {
+					Consola::setBackgroundColor(Consola::BRANCO);
+					cout << " ";
+				}
 			}
 			else {
-				Consola::setBackgroundColor(Consola::AMARELO);
+				Consola::setBackgroundColor(Consola::CINZENTO);
 				cout << " ";
 			}
-			c++;
 		}
 	}
 	Consola::setBackgroundColor(Consola::PRETO);
 	Colonia *colonia = planicie->pesquisaColonia(LETRAS[0]);
 	if (colonia == nullptr)
 		return;
-	Consola::gotoxy(11, 30);
+	Consola::gotoxy(11, 26);
 	cout << " \t \t";
-	Consola::gotoxy(4, 30);
+	Consola::gotoxy(4, 26);
 	cout << "Moedas: " << colonia->getMoedas();
+	Consola::gotoxy(16, 27);
+	cout << " \t \t";
+	Consola::gotoxy(4, 27);
+	if (colonia->estaEmModoAtaque())
+		cout << "Modo: Ataque";
+	else
+		cout << "Modo: Recolha";
 }
+
+//void Interface::desenhaPlanicie(int x, int y, int lin, int col) const {
+//
+//	int c = 1;
+//
+//	for (int i = y; i <= lin + y; i++) {
+//		for (int j = x; j <= col + x; j++) {
+//			Consola::gotoxy(j - x + 4, i - y + 4);
+//			if (planicie->verificaLimitePlanicie(j, i)) {
+//				if (c % 2 == 0) {
+//					Consola::setBackgroundColor(Consola::BRANCO);
+//					cout << " ";
+//				}
+//				else {
+//					Consola::setBackgroundColor(Consola::AMARELO);
+//					cout << " ";
+//				}
+//				c++;
+//			}
+//			else {
+//				Consola::setBackgroundColor(Consola::CINZENTO);
+//				cout << " ";
+//			}
+//		}
+//	}
+//	Consola::setBackgroundColor(Consola::PRETO);
+//	Colonia *colonia = planicie->pesquisaColonia(LETRAS[0]);
+//	if (colonia == nullptr)
+//		return;
+//	Consola::gotoxy(11, 30);
+//	cout << " \t \t";
+//	Consola::gotoxy(4, 30);
+//	cout << "Moedas: " << colonia->getMoedas();
+//}
+
+//void Interface::desenhaPlanicie(int x, int y, int lin, int col) const{
+//
+//	int c = 1;
+//
+//	for (int i = y; i <= lin + y; i++){
+//		for (int j = x; j <= col + x; j++){
+//			Consola::gotoxy(j, i);
+//			if (c % 2 == 0) {
+//				Consola::setBackgroundColor(Consola::BRANCO);
+//				cout << " ";
+//			}
+//			else {
+//				Consola::setBackgroundColor(Consola::AMARELO);
+//				cout << " ";
+//			}
+//			c++;
+//		}
+//	}
+//	Consola::setBackgroundColor(Consola::PRETO);
+//	Colonia *colonia = planicie->pesquisaColonia(LETRAS[0]);
+//	if (colonia == nullptr)
+//		return;
+//	Consola::gotoxy(11, 30);
+//	cout << " \t \t";
+//	Consola::gotoxy(4, 30);
+//	cout << "Moedas: " << colonia->getMoedas();
+//}
 
 void Interface::desenhaSeresEdificios(int x, int y, int lin, int col) const{
 
 	vector<Ser*> seres;
+	vector<Ser*> parias;
 	vector<Edificio*> edi;
+
+	planicie->getParias(parias);
+	for (unsigned int j = 0; j < parias.size(); j++) {
+		if (parias[j]->getX() <= col + x && parias[j]->getX() >= x
+			&& parias[j]->getY() <= lin + y && parias[j]->getY() >= y) {
+
+			if ((parias[j]->getY() - y + 4) % 2 == 0 && (parias[j]->getX() - x + 4) % 2 == 0) {
+				Consola::setBackgroundColor(Consola::BRANCO);
+			}
+			else if ((parias[j]->getY() - y + 4) % 2 == 0 && (parias[j]->getX() - x + 4) % 2 != 0) {
+				Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+			}
+			else if ((parias[j]->getY() - y + 4) % 2 != 0 && (parias[j]->getX() - x + 4) % 2 == 0) {
+				Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+			}
+			else if ((parias[j]->getY() - y + 4) % 2 != 0 && (parias[j]->getX() - x + 4) % 2 != 0) {
+				Consola::setBackgroundColor(Consola::BRANCO);
+			}
+
+			Consola::gotoxy(parias[j]->getX() - x + 4, parias[j]->getY() - y + 4);
+			cout << parias[j]->getLetraPerfil();
+		}
+	}
 
 	for (int i = 0; i < planicie->getNumColonias(); i++){
 		Colonia *c = planicie->pesquisaColonia(i);
@@ -521,26 +783,55 @@ void Interface::desenhaSeresEdificios(int x, int y, int lin, int col) const{
 		for (unsigned int j = 0; j < seres.size(); j++){
 			if (seres[j]->getX() <= col + x && seres[j]->getX() >= x 
 				&& seres[j]->getY() <= lin + y && seres[j]->getY() >= y) {
+
+				if ((seres[j]->getY() - y + 4) % 2 == 0 && (seres[j]->getX() - x + 4) % 2 == 0) {
+					Consola::setBackgroundColor(Consola::BRANCO);
+				}
+				else if ((seres[j]->getY() - y + 4) % 2 == 0 && (seres[j]->getX() - x + 4) % 2 != 0) {
+					Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+				}
+				else if ((seres[j]->getY() - y + 4) % 2 != 0 && (seres[j]->getX() - x + 4) % 2 == 0) {
+					Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+				}
+				else if ((seres[j]->getY() - y + 4) % 2 != 0 && (seres[j]->getX() - x + 4) % 2 != 0) {
+					Consola::setBackgroundColor(Consola::BRANCO);
+				}
+
 				Consola::gotoxy(seres[j]->getX() - x + 4, seres[j]->getY() - y + 4);
 				cout << seres[j]->getLetraPerfil();
-				
 			}
 		}
 
-		for (unsigned int k = 0; k < edi.size(); k++) {
-			if (edi[k]->getX() <= col + x && edi[k]->getX() >= x && 
-				edi[k]->getY() <= lin + y && edi[k]->getY() >= y) {
-				Consola::gotoxy(edi[k]->getX() - x + 4, edi[k]->getY() - y + 4);
-				cout << edi[k]->getEid();
+		for (unsigned int j = 0; j < edi.size(); j++) {
+			if (edi[j]->getX() <= col + x && edi[j]->getX() >= x && 
+				edi[j]->getY() <= lin + y && edi[j]->getY() >= y) {
+
+				if ((edi[j]->getY() - y + 4) % 2 == 0 && (edi[j]->getX() - x + 4) % 2 == 0) {
+					Consola::setBackgroundColor(Consola::BRANCO);
+				}
+				else if ((edi[j]->getY() - y + 4) % 2 == 0 && (edi[j]->getX() - x + 4) % 2 != 0) {
+					Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+				}
+				else if ((edi[j]->getY() - y + 4) % 2 != 0 && (edi[j]->getX() - x + 4) % 2 == 0) {
+					Consola::setBackgroundColor(Consola::BRANCO_CLARO);
+				}
+				else if ((edi[j]->getY() - y + 4) % 2 != 0 && (edi[j]->getX() - x + 4) % 2 != 0) {
+					Consola::setBackgroundColor(Consola::BRANCO);
+				}
+
+				Consola::gotoxy(edi[j]->getX() - x + 4, edi[j]->getY() - y + 4);
+				if (usarEid)
+					cout << edi[j]->getEid();
+				else
+					cout << edi[j]->getNome().at(0);
 			}
 		}
 		seres.clear();
 		edi.clear();
 	}
-
 }
 
-void Interface::imprimeErros(int codigo){
+void Interface::imprimeMensagens(int codigo){
 
 	switch (codigo){
 		case NUM_SERES_INVALIDO:
@@ -565,7 +856,7 @@ void Interface::imprimeErros(int codigo){
 			erro = "Processo efetuado com sucesso";
 			break;
 		case LIMITE_PLANICIE_INVALIDO:
-			erro = "Limite da planicia invalido";
+			erro = "Fora dos limites da planicie";
 			break;
 		case EDIFICIO_INVALIDO:
 			erro = "Esse edificio nao existe";
@@ -597,8 +888,78 @@ void Interface::imprimeErros(int codigo){
 		case JOGO_CARREGADO:
 			erro = "Carregaste o jogo com sucesso";
 			break;
+		case MODO_RECOLHE_OK:
+			erro = "Mandaste recolher os teus seres";
+			break;
+		case MODO_RECOLHE_INVALIDO:
+			erro = "Os teus seres ja estao em modo recolhe";
+			break;
+		case MODO_ATAQUE_OK:
+			erro = "Mandaste os teus seres atacarem";
+			break;
+		case MODO_ATAQUE_INVALIDO:
+			erro = "Os teus seres ja estao em modo ataque";
+			break;
+		case DIM_DEFINIDO:
+			erro = "Definiste a dimensao da planicie com sucesso";
+			break;
+		case DIM_POR_DEFINIR:
+			erro = "Tens de primeiro definir a dimensao da planicie!";
+			break;
+		case NUM_OPONENTES_INVALIDO:
+			erro = "O numero de oponentes que introduziste e invalido";
+			break;
+		case OPONENTES_OK:
+			erro = "Os oponentes foram adicionados ao jogo, em cima podes ver os seus castelos";
+			break;
+		case MAX_PERFIS_ATINGIGO:
+			erro = "Nao podes criar mais perfis, o maximo e 5";
+			break;
+		case PERFIL_JA_EXISTE:
+			erro = "Ja existe um perfil com esse nome";
+			break;
+		case PERFIL_OK:
+			erro = "Criaste o teu perfil com sucesso";
+			break;
+		case SEM_FORCA:
+			erro = "Nao tens mais forca para adicionar caracteristicas";
+			break;
+		case ADD_CARACTERISTICA_OK:
+			erro = "Adicionaste a caracteristica com sucesso";
+			break;
+		case PERFIL_NAO_EXISTE:
+			erro = "Esse perfil nao existe";
+			break;
+		case REMOVE_CARACTERISTICA_OK:
+			erro = "Removeste a caracteristica com sucesso";
+			break;
+		case CARACTERISTICA_NAO_EXISTE:
+			erro = "Essa caracteristica nao existe";
+			break;
+		case REMOVE_PERFIL_OK:
+			erro = "Removeste o perfil com sucesso";
+			break;
+		case FOCO_OK:
+			erro = "Focaste o mapa para as nova linha e coluna inserida";
+			break;
+		case VENDER_CASTELO_INVALIDO:
+			erro = "Nao podes vender o castelo";
+			break;
+		case PERDESTE:
+			erro = "PERDESTE";
+			break;
+		case GANHASTE:
+			erro = "GANHASTE";
+			break;
+		case LETRA_PERFIL_INVALIDA:
+			erro = "Nao podes criar perfis com a letra 'i' ou 'j'";
+			break;
+
+		case COMANDO_NAO_RECONHECIDO:
+			erro = "Comando não reconhecido";
+			break;
 		default:
-			erro = "Erro de ponteiros..";
+			erro = "Mensagem nao conhecida..";
 			break;
 	}
 }
@@ -615,18 +976,17 @@ void Interface::iniciaJogo(){
 			return;
 		}
 
-		//listaCaracteristicas();
-		desenhaPlanicie(4, 4, LINHAS, COLUNAS);
+		desenhaPlanicie(x, y, LINHAS, COLUNAS);
 		desenhaSeresEdificios(x, y, LINHAS, COLUNAS);
 
 		Consola::setTextColor(Consola::VERMELHO_CLARO);
 		Consola::setBackgroundColor(Consola::PRETO);
 
 		Consola::gotoxy(4, 38);
-		cout << erro;
+		cout << erro << " \t \t \t \t \t";
 
 		Consola::gotoxy(13, 35);
-		cout << " \t \t \t \t \t \t \t \t \t \t";
+		cout << " \t \t \t \t \t \t \t";
 
 		Consola::gotoxy(4, 35);
 		cout << "Comando: ";
@@ -647,6 +1007,7 @@ void Interface::iniciaJogo(){
 				erro = "Erro: Precisas de escrever o nome do ficheiro!";
 				return;
 			}
+			erro = "Carregaste os comandos do ficheiro!";
 			lerComandosDeFicheiroDeTexto(nomeFich);
 		}
 		else {
@@ -657,7 +1018,7 @@ void Interface::iniciaJogo(){
 
 void Interface::configuraJogo() {
 	Consola::clrscr();
-	Consola::setScreenSize(40, 160); //X Y
+	Consola::setScreenSize(42, 160); //X Y
 	Consola::setTextColor(Consola::VERMELHO_CLARO);
 	Consola::setBackgroundColor(Consola::PRETO);
 
@@ -672,24 +1033,29 @@ void Interface::configuraJogo() {
 		Consola::setBackgroundColor(Consola::PRETO);
 
 		listaCaracteristicas();
+		listaComandosConfiguracao();
 		if (definiuDimensao) {
 			listaCaracteristicasPerfil();
 			listaCoordenadasCastelos();
+
+			Colonia *colonia = planicie->pesquisaColonia(LETRAS[0]);
+			if (colonia == nullptr)
+				return;
+			Consola::gotoxy(42, 17);
+			cout << " \t";
+			Consola::gotoxy(35, 17);
+			cout << "Moedas: " << colonia->getMoedas();
 		}
 
-		Consola::gotoxy(4, 30);
-		cout << "Castle War\n";
-		Consola::gotoxy(4, 31);
+		Consola::gotoxy(4, 35);
 		cout << "Podes configurar o jogo através de um ficheiro de texto";
-		Consola::gotoxy(4, 32);
+		Consola::gotoxy(4, 36);
 		cout << "Podes configurar jogo manualmente";
-		Consola::gotoxy(4, 33);
-		cout << "Podes pedir ajuda";
 
-		Consola::gotoxy(4, 38);
+		Consola::gotoxy(4, 40);
 		cout << erro;
 
-		Consola::gotoxy(4, 35);
+		Consola::gotoxy(4, 38);
 		cout << "Comando: ";
 		getline(cin, linha);
 
@@ -730,39 +1096,42 @@ void Interface::menuInicial(){
 			Consola::setScreenSize(90, 50);
 			Consola::setBackgroundColor(Consola::PRETO);
 			Consola::setTextColor(Consola::VERDE_CLARO);
+			delete planicie;
+			planicie = nullptr;
 			fimJogo = false;
 		}
+
 		Consola::gotoxy(50, 5);
 		cout << "Castle War\n";
 		Consola::gotoxy(51, 8);
 		cout << "1 - Jogar";
 		Consola::gotoxy(51, 9);
-		cout << "2 - Ajuda";
-		Consola::gotoxy(51, 10);
-		cout << "3 - Sair";
+		cout << "2 - Sair";
 
-		Consola::gotoxy(58, 13);
-		cout << " \t \t \t \t \t \t";
+		Consola::gotoxy(60, 13);
+		cout << " \t \t \t \t";
 		Consola::gotoxy(50, 13);
-		cout << "Comando:";
+		cout << char(196) << char(62) << "Comando: ";
 		cin >> opcao;
 
-		if (cin.fail()) {
+		while (cin.fail()) {
 			cin.clear();
-			cin.ignore(INT_MAX);
+			cin.ignore(256, '\n');
 			Consola::gotoxy(50, 15);
-			cout << "Insira um número de 1 a 3 \t\t\t\t\t\t\t\t";
-			continue;
+			cout << "Opcao invalida \t";
+			Consola::gotoxy(60, 13);
+			cout << " \t \t \t \t";
+			Consola::gotoxy(59, 13);
+			cin >> opcao;
 		}
 
 		switch (opcao){
 			case 1: configuraJogo(); break;
-			case 2: break; //Ajuda
-			case 3: return;
+			case 2: return;
 			default:
 				Consola::gotoxy(50, 15);
-				cout << "Comando errado \t\t\t\t\t\t\t\t\t\t\t";
-				continue;
+				cout << "Opcao invalida \t";
+				break;
 		}
 	}
 }

@@ -107,27 +107,29 @@ int Perfil::pesquisaCaracteristica(int id){
 	return -1;
 }
 
-bool Perfil::addCaracteristica(int id) {
+int Perfil::addCaracteristica(int id) {
 	Caracteristica *c = FabricaCaracteristicas::cria(id);
 
-	if (forca - c->getCustoForca() >= 0 && c != nullptr) {
-		forca -= c->getCustoForca();
-		preco += c->getCustoMonetario();
-		caracteristicas.push_back(c);
-		return true;
-	}
+	if (c == nullptr)
+		return -1;
 
-	return false;
+	if (forca - c->getCustoForca() < 0)
+		return 30;
+
+	forca -= c->getCustoForca();
+	preco += c->getCustoMonetario();
+	caracteristicas.push_back(c);
+	return 31;
 }
 
-bool Perfil::removeCaracteristica(int id){
+int Perfil::removeCaracteristica(int id){
 	int i = pesquisaCaracteristica(id);
 	if (i == -1)
-		return false;
+		return 34;
 
 	delete caracteristicas[i];
 	caracteristicas.erase(caracteristicas.begin() + i);
-	return true;
+	return 33;
 
 }
 
@@ -148,4 +150,10 @@ string Perfil::toString() const{
 		out << c->toString();
 
 	return out.str();
+}
+
+void Perfil::reiniciaCaracteristicas(){
+	for each (Caracteristica *c in caracteristicas){
+		c->setUsou(false);
+	}
 }

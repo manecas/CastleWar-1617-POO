@@ -32,10 +32,12 @@ public:
 	void getCaracteristicas(vector<Caracteristica*> & carac);
 	char getLetra()const;
 	int pesquisaCaracteristica(int id);
-	bool addCaracteristica(int id);
-	bool removeCaracteristica(int id);
+	int addCaracteristica(int id);
+	int removeCaracteristica(int id);
 	void atua(Ser * s, Colonia * col, Planicie * p);
 	string toString()const;
+
+	void reiniciaCaracteristicas();
 };
 
 #endif // !_PERFIL

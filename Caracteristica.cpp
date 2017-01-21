@@ -13,20 +13,6 @@ using std::ostringstream;
 Caracteristica::Caracteristica(const string & n, int iden, int custoM, int custoF, bool us):
 	nome(n), id(iden), custoMonetario(custoM), custoForca(custoF), usou(us) { }
 
-//Caracteristica::Caracteristica(const Caracteristica & ob) { *this = ob; }
-//
-//Caracteristica & Caracteristica::operator=(const Caracteristica & ob){
-//	if (this == &ob)
-//		return *this;
-//
-//	nome = ob.nome;
-//	id = ob.id;
-//	custoMonetario = ob.custoMonetario;
-//	custoForca = ob.custoForca;
-//
-//	return *this;
-//}
-
 string Caracteristica::getNome() const { return nome; }
 
 int Caracteristica::getId() const { return id; }
@@ -57,11 +43,11 @@ int Bandeira::getDefesa() const { return 0; }
 
 int Bandeira::getVelocidade() const{ return 0; }
 
-bool Caracteristica::operator==(const Caracteristica * const c) const {
-	if (id == c->getId())
-		return true;
-	return false;
-}
+//bool Caracteristica::operator==(const Caracteristica * const c) const {
+//	if (id == c->getId())
+//		return true;
+//	return false;
+//}
 
 void Bandeira::efeito(Ser * s, Colonia * c,  Planicie * p){
 	
@@ -70,8 +56,7 @@ void Bandeira::efeito(Ser * s, Colonia * c,  Planicie * p){
 Caracteristica * Bandeira::duplica() const{ return new Bandeira(*this); }
 
 //SUPERIOR
-Superior::Superior() : Caracteristica("Superior", 2, 1, 1, false), saudeMax(1), 
-incrementou(false) { }
+Superior::Superior() : Caracteristica("Superior", 2, 1, 1, false), saudeMax(1){ }
 
 int Superior::getSaudeMaxima() const { return saudeMax; }
 
@@ -81,21 +66,13 @@ int Superior::getDefesa() const { return 0; }
 
 int Superior::getVelocidade() const { return 0; }
 
-void Superior::efeito(Ser * s, Colonia * c,  Planicie * p){
-
-	if (!incrementou) {
-		s->aumentaSaudeMaxima(saudeMax);
-		incrementou = true;
-	}
-
-}
+void Superior::efeito(Ser * s, Colonia * c,  Planicie * p){ }
 
 Caracteristica * Superior::duplica() const{ return new Superior(*this); }
 
 
 //PELEDURA
-PeleDura::PeleDura() : Caracteristica("PeleDura", 3, 2, 2, false), defesa(1),
-incrementou(false) { }
+PeleDura::PeleDura() : Caracteristica("PeleDura", 3, 2, 2, false), defesa(1){ }
 
 int PeleDura::getSaudeMaxima() const { return 0; }
 
@@ -105,20 +82,13 @@ int PeleDura::getDefesa() const { return defesa; }
 
 int PeleDura::getVelocidade() const { return 0; }
 
-void PeleDura::efeito(Ser * s, Colonia * c,  Planicie * p) {
-
-	if (!incrementou) {
-		s->setDefesa(s->getTotalDefesa() + 1);
-		incrementou = true;
-	}
-}
+void PeleDura::efeito(Ser * s, Colonia * c,  Planicie * p) { }
 
 Caracteristica * PeleDura::duplica() const{ return new PeleDura(*this); }
 
 
 //ARMADURA
-Armadura::Armadura() : Caracteristica("Armadura", 4, 2, 3, false), defesa(2),
-incrementou(false) { }
+Armadura::Armadura() : Caracteristica("Armadura", 4, 2, 3, false), defesa(2){ }
 
 int Armadura::getSaudeMaxima() const { return 0; }
 
@@ -128,19 +98,13 @@ int Armadura::getDefesa() const { return defesa; }
 
 int Armadura::getVelocidade() const { return 0; }
 
-void Armadura::efeito(Ser * s, Colonia * c,  Planicie * p) {
-	if (!incrementou) {
-		s->setDefesa(s->getTotalDefesa() + 2);
-		incrementou = true;
-	}
-}
+void Armadura::efeito(Ser * s, Colonia * c,  Planicie * p) { }
 
 Caracteristica * Armadura::duplica() const{ return new Armadura(*this); }
 
 
 //FACA
-Faca::Faca() : Caracteristica("Faca", 5, 1, 1, false), ataque(1),
-incrementou(false) { }
+Faca::Faca() : Caracteristica("Faca", 5, 1, 1, false), ataque(1) { }
 
 int Faca::getSaudeMaxima() const { return 0; }
 
@@ -150,12 +114,7 @@ int Faca::getDefesa() const { return 0; }
 
 int Faca::getVelocidade() const { return 0; }
 
-void Faca::efeito(Ser * s, Colonia * c,  Planicie * p) {
-	if (!incrementou) {
-		s->setAtaque(s->getTotalAtaque() + 1);
-		incrementou = true;
-	}
-}
+void Faca::efeito(Ser * s, Colonia * c,  Planicie * p) { }
 
 Caracteristica * Faca::duplica() const{ return new Faca(*this); }
 
@@ -174,9 +133,13 @@ int Espada::getVelocidade() const { return 0; }
 
 void Espada::efeito(Ser * s, Colonia * c,  Planicie * p) {
 
+	if (s == nullptr || c == nullptr)
+		return;
+
 	if (!jaUsou()) {
 		if (s->getNumAtaques() == 1) {
-			s->setAtaque(s->getTotalAtaque() + ataqueIncremento);
+			s->aumentaAtaque(ataqueIncremento);
+			decrementou = false;
 		}
 		else if (s->getNumAtaques() == 2) {
 			setUsou(true);
@@ -184,7 +147,7 @@ void Espada::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	}
 	else {
 		if (!decrementou) {
-			s->setAtaque(s->getTotalAtaque() - ataqueIncremento);
+			s->diminuiAtaque(ataqueIncremento);
 			decrementou = true;
 		}
 	}
@@ -211,36 +174,14 @@ void Agressao::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	int x = s->getX();
 	int y = s->getY();
 
-	for (int k = 0; k < p->getNumColonias(); k++) {
-		Colonia *col = p->pesquisaColonia(k);
-		if (col == nullptr)
-			return;
-
-		if (col != c) {
-			for (int i = y - distAtaque; i <= y + distAtaque; i++) { //Linhas
-				for (int j = x - distAtaque; j <= x + distAtaque; j++) { //Colunas
-					if (i == y && j == x)
-						continue;
-					else {
-						if (p->verificaLimitePlanicie(j, i)) {
-							int posS = col->pesquisaSer(j, i);
-							int posP = col->pesquisaParia(j, i);
-							if (posS != -1) {
-								Ser *s = col->pesquisaSerPorIndice(posS);
-								if (s == nullptr)
-									return;
-								s->recebeAtaque(s->getTotalAtaque());
-								s->aumentaNumAtaques(1);
-							}
-							else if (posP != -1) {
-								Ser *s = col->pesquisaPariaPorIndice(posP);
-								if (s == nullptr)
-									return;
-								s->recebeAtaque(s->getTotalAtaque());
-								s->aumentaNumAtaques(1);
-							}
-						}
-					}
+	for (int i = y - distAtaque; i <= y + distAtaque; i++) { //Linhas
+		for (int j = x - distAtaque; j <= x + distAtaque; j++) { //Colunas
+			if (i == y && j == x)
+				continue;
+			else {
+				if (p->atacaSeresAdjacentes(j, i, s->getTotalDefesa(), c)) {
+					s->aumentaNumAtaques(1);
+					return;
 				}
 			}
 		}
@@ -268,28 +209,14 @@ void Ecologico::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	int x = s->getX();
 	int y = s->getY();
 
-	for (int k = 0; k < p->getNumColonias(); k++) {
-		Colonia *col = p->pesquisaColonia(k);
-		if (col == nullptr)
-			return;
-
-		if (col != c) {
-			for (int i = y - distAtaque; i <= y + distAtaque; i++) { //Linhas
-				for (int j = x - distAtaque; j <= x + distAtaque; j++) { //Colunas
-					if (i == y && j == x)
-						continue;
-					else {
-						if (p->verificaLimitePlanicie(j, i)) {
-							int posE = col->pesquisaEdificio(j, i);
-							if (posE != -1) {
-								Edificio *e = col->pesquisaEdificioPorIndice(posE);
-								if (e == nullptr)
-									return;
-								e->recebeAtaque(s->getTotalAtaque());
-								s->aumentaNumAtaques(1);
-							}
-						}
-					}
+	for (int i = y - distAtaque; i <= y + distAtaque; i++) { //Linhas
+		for (int j = x - distAtaque; j <= x + distAtaque; j++) { //Colunas
+			if (i == y && j == x)
+				continue;
+			else {
+				if (p->atacaEdificiosAdjacentes(j, i, s->getTotalAtaque(), c)) {
+					s->aumentaNumAtaques(1);
+					return;
 				}
 			}
 		}
@@ -302,13 +229,13 @@ Caracteristica * Ecologico::duplica() const{ return new Ecologico(*this); }
 //HEATSEEKER
 HeatSeeker::HeatSeeker() : Caracteristica("HeatSeeker", 9, 1, 1, false), velocidade(1) { }
 
-int HeatSeeker::getSaudeMaxima() const { return velocidade; }
+int HeatSeeker::getSaudeMaxima() const { return 0; }
 
 int HeatSeeker::getAtaque() { return 0; }
 
 int HeatSeeker::getDefesa() const { return 0; }
 
-int HeatSeeker::getVelocidade() const { return 1; }
+int HeatSeeker::getVelocidade() const { return velocidade; }
 
 void HeatSeeker::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	if (s == nullptr || p == nullptr)
@@ -317,110 +244,43 @@ void HeatSeeker::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	int x = s->getX();
 	int y = s->getY();
 	vector<Posicao> pos;
-	vector<Ser*> seres;
+	vector<Ser*> inimigos;
 
-	for (int k = 0; k < p->getNumColonias(); k++) {
-		Colonia *col = p->pesquisaColonia(k);
-		if (col == nullptr)
-			return;
-		if (col != c) {
-			col->getSeres(seres);
-		}
-	}
+	p->getSeresInimigos(inimigos, c);
 
-	for each (Ser *ser in seres) {
-		if (ser == nullptr)
-			return;
-		Posicao p(ser->getX(), ser->getY());
-		pos.push_back(p);
-	}
-
-	if (pos.size() == 0) {
+	if (inimigos.size() == 0) {
 		Edificio *e = c->pesquisaEdificioPorTipo(ID_CASTELO);
 		if (e == nullptr)
 			return;
 
-		for (int k = 0; k < p->getNumColonias(); k++) {
-			Colonia *col = p->pesquisaColonia(k);
-			if (col == nullptr)
-				return;
-			if (e->getY() > y) {
-				int posS = col->pesquisaSer(x, y + 1);
-				int posE = col->pesquisaEdificio(x, y + 1);
-				if (posS == -1 && posE == -1) {
-					s->setY(s->getY() + 1);
-				}
-			}
-			else if (e->getY() < y) {
-				int posS = col->pesquisaSer(x, y - 1);
-				int posE = col->pesquisaEdificio(x, y - 1);
-				if (posS == -1 && posE == -1) {
-					s->setY(s->getY() - 1);
-				}
-			}
-			else if (e->getX() > x) {
-				int posS = col->pesquisaSer(x + 1, y);
-				int posE = col->pesquisaEdificio(x + 1, y);
-				if (posS == -1 && posE == -1) {
-					s->setX(s->getX() + 1);
-				}
-			}
-			else if (e->getX() < x) {
-				int posS = col->pesquisaSer(x - 1, y);
-				int posE = col->pesquisaEdificio(x - 1, y);
-				if (posS == -1 && posE == -1) {
-					s->setX(s->getX() - 1);
-				}
-			}
-		}
-	}
-
-	int indexMaisProxima;
-	double aux = 2000;
-	double maisProxima = 0;
-	for (unsigned int z = 0; z < pos.size(); z++) {
-		maisProxima = sqrt(pow(x - pos[z].getX(), 2) + pow(y - pos[z].getY(), 2));
-		if (maisProxima < aux) {
-			aux = maisProxima;
-			indexMaisProxima = x;
-		}
-	}
-
-	Posicao p1 = pos[indexMaisProxima];
-
-	for (int k = 0; k < p->getNumColonias(); k++) {
-		Colonia *col = p->pesquisaColonia(k);
-		if (col == nullptr)
+		Posicao *posicao = Posicao::getPosicaoMovimento(x, y, e->getX(), e->getY());
+		if (posicao == nullptr)
 			return;
 
-		if (p1.getY() > y) {
-			int posS = col->pesquisaSer(x, y + 1);
-			int posE = col->pesquisaEdificio(x, y + 1);
-			if (posS == -1 && posE == -1) {
-				s->setY(s->getY() + 1);
-			}
+		if (posicao->getX() == e->getX() && posicao->getY() == e->getY()) {
+			s->setX(posicao->getX());
+			s->setY(posicao->getY());
 		}
-		else if (p1.getY() < y) {
-			int posS = col->pesquisaSer(x, y - 1);
-			int posE = col->pesquisaEdificio(x, y - 1);
-			if (posS == -1 && posE == -1) {
-				s->setY(s->getY() - 1);
-			}
+		else if (p->verificaMovimentoSerXY(posicao->getX(), posicao->getY())) {
+			s->setX(posicao->getX());
+			s->setY(posicao->getY());
 		}
-		else if (p1.getX() > x) {
-			int posS = col->pesquisaSer(x + 1, y);
-			int posE = col->pesquisaEdificio(x + 1, y);
-			if (posS == -1 && posE == -1) {
-				s->setX(s->getX() + 1);
-			}
-		}
-		else if (p1.getX() < x) {
-			int posS = col->pesquisaSer(x - 1, y);
-			int posE = col->pesquisaEdificio(x - 1, y);
-			if (posS == -1 && posE == -1) {
-				s->setX(s->getX() - 1);
-			}
-		}
+		return;
+	}
+
+	Posicao::getPosicoesSeres(inimigos, pos);
+	Posicao *maisPro = Posicao::inimigoMaisProximo(pos, s->getX(), s->getY());
+
+	if (maisPro == nullptr)
+		return;
+	
+	Posicao *posicao = Posicao::getPosicaoMovimento(x, y, maisPro->getX(), maisPro->getY());
+	if (posicao == nullptr)
+		return;
+
+	if (p->verificaMovimentoSerXY(posicao->getX(), posicao->getY())) {
+		s->setX(posicao->getX());
+		s->setY(posicao->getY());
 	}
 }
 
@@ -430,13 +290,13 @@ Caracteristica * HeatSeeker::duplica() const{ return new HeatSeeker(*this); }
 //BUILDSEEKER
 BuildSeeker::BuildSeeker() : Caracteristica("BuildSeeker", 10, 1 ,1, false), velocidade(1) { }
 
-int BuildSeeker::getSaudeMaxima() const { return velocidade; }
+int BuildSeeker::getSaudeMaxima() const { return 0; }
 
 int BuildSeeker::getAtaque() { return 0; }
 
 int BuildSeeker::getDefesa() const { return 0; }
 
-int BuildSeeker::getVelocidade() const { return 1; }
+int BuildSeeker::getVelocidade() const { return velocidade; }
 
 void BuildSeeker::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	if (s == nullptr || p == nullptr)
@@ -445,120 +305,42 @@ void BuildSeeker::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	int x = s->getX();
 	int y = s->getY();
 	vector<Posicao> pos;
-	vector<Edificio*> edi;
+	vector<Edificio*> inimigos;
 
-	for (int k = 0; k < p->getNumColonias(); k++) {
-		Colonia *col = p->pesquisaColonia(k);
-		if (col == nullptr)
-			return;
-		if (col != c) {
-			col->getEdificios(edi);
-		}
-	}
+	p->getEdificiosInimigos(inimigos, c);
 
-	for each (Edificio *e in edi) {
-		if (e == nullptr)
-			return;
-		Posicao p(e->getX(), e->getY());
-		pos.push_back(p);
-	}
-
-	if (pos.size() == 0) {
+	if (inimigos.size() == 0) {
 		Edificio *e = c->pesquisaEdificioPorTipo(ID_CASTELO);
 		if (e == nullptr)
 			return;
-
-		for (int k = 0; k < p->getNumColonias(); k++) {
-			Colonia *col = p->pesquisaColonia(k);
-			if (col == nullptr)
-				return;
-			if (e->getY() > y) {
-				int posS = col->pesquisaSer(x, y + 1);
-				int posE = col->pesquisaEdificio(x, y + 1);
-				if (posS == -1 && posE == -1) {
-					s->setY(s->getY() + 1);
-				}
-			}
-			else if (e->getY() < y) {
-				int posS = col->pesquisaSer(x, y - 1);
-				int posE = col->pesquisaEdificio(x, y - 1);
-				if (posS == -1 && posE == -1) {
-					s->setY(s->getY() - 1);
-				}
-			}
-			else if (e->getX() > x) {
-				int posS = col->pesquisaSer(x + 1, y);
-				int posE = col->pesquisaEdificio(x + 1, y);
-				if (posS == -1 && posE == -1) {
-					s->setX(s->getX() + 1);
-				}
-			}
-			else if (e->getX() < x) {
-				int posS = col->pesquisaSer(x - 1, y);
-				int posE = col->pesquisaEdificio(x - 1, y);
-				if (posS == -1 && posE == -1) {
-					s->setX(s->getX() - 1);
-				}
-			}
-		}
-	}
-
-	int indexMaisProxima;
-	double aux = 2000;
-	double maisProxima;
-	for (unsigned int z = 0; z < pos.size(); z++) {
-		maisProxima = sqrt(pow(x - pos[z].getX(), 2) + pow(y - pos[z].getY(), 2));
-		if (maisProxima < aux) {
-			aux = maisProxima;
-			indexMaisProxima = z;
-		}
-	}
-
-	if (indexMaisProxima < 0)
-		return;
-	Posicao p1 = pos[indexMaisProxima];
-
-	int posS;
-	int posE;
-	char destino;
-	for (int k = 0; k < p->getNumColonias(); k++) {
-		Colonia *col = p->pesquisaColonia(k);
-		if (col == nullptr)
+		Posicao *posicao = Posicao::getPosicaoMovimento(x, y, e->getX(), e->getY());
+		if (posicao == nullptr)
 			return;
 
-		if (p1.getY() > y) {
-			posS = col->pesquisaSer(x, y + 1);
-			posE = col->pesquisaEdificio(x, y + 1);
-			if (posS == -1 && posE == -1) {
-				destino = 'B';
-			}
+		if (posicao->getX() == e->getX() && posicao->getY() == e->getY()) {
+			s->setX(posicao->getX());
+			s->setY(posicao->getY());
 		}
-		else if (p1.getY() < y) {
-			posS = col->pesquisaSer(x, y - 1);
-			posE = col->pesquisaEdificio(x, y - 1);
-			if (posS == -1 && posE == -1) {
-				destino = 'C';
-			}
+		else if (p->verificaMovimentoSerXY(posicao->getX(), posicao->getY())) {
+			s->setX(posicao->getX());
+			s->setY(posicao->getY());
 		}
-		else if (p1.getX() > x) {
-			posS = col->pesquisaSer(x + 1, y);
-			posE = col->pesquisaEdificio(x + 1, y);
-			if (posS == -1 && posE == -1) {
-				destino = 'D';
-			}
-		}
-		else if (p1.getX() < x) {
-			posS = col->pesquisaSer(x - 1, y);
-			posE = col->pesquisaEdificio(x - 1, y);
-			if (posS == -1 && posE == -1) {
-				destino = 'E';
-			}
-		}
+		return;
 	}
-	s->setY(s->getY() + 1);
-	s->setY(s->getY() - 1);
-	s->setX(s->getX() + 1);
-	s->setX(s->getX() - 1);
+
+	Posicao::getPosicoesEdificios(inimigos, pos);
+	Posicao *maisPro = Posicao::inimigoMaisProximo(pos, s->getX(), s->getY());
+	if (maisPro == nullptr)
+		return;
+
+	Posicao *posicao = Posicao::getPosicaoMovimento(x, y, maisPro->getX(), maisPro->getY());
+	if (posicao == nullptr)
+		return;
+
+	if (p->verificaMovimentoSerXY(posicao->getX(), posicao->getY())) {
+		s->setX(posicao->getX());
+		s->setY(posicao->getY());
+	}
 }
 
 Caracteristica * BuildSeeker::duplica() const{ return new BuildSeeker(*this); }
@@ -567,13 +349,13 @@ Caracteristica * BuildSeeker::duplica() const{ return new BuildSeeker(*this); }
 //WALKER
 Walker::Walker() : Caracteristica("Walker", 11, 1, 1, false), velocidade(1) { }
 
-int Walker::getSaudeMaxima() const { return velocidade; }
+int Walker::getSaudeMaxima() const { return 0; }
 
 int Walker::getAtaque() { return 0; }
 
 int Walker::getDefesa() const { return 0; }
 
-int Walker::getVelocidade() const { return 1; }
+int Walker::getVelocidade() const { return velocidade; }
 
 void Walker::efeito(Ser * s, Colonia * c,  Planicie * p) {
 	if (s == nullptr || p == nullptr)
@@ -581,7 +363,7 @@ void Walker::efeito(Ser * s, Colonia * c,  Planicie * p) {
 
 	int x = s->getX();
 	int y = s->getY();
-	bool livre = true;
+	
 	vector<Posicao> pos;
 
 	for (int i = y - velocidade; i <= y + velocidade; i++) { //Linhas
@@ -590,22 +372,7 @@ void Walker::efeito(Ser * s, Colonia * c,  Planicie * p) {
 				if (i == y && j == x)
 					continue;
 				else {
-					for (int k = 0; k < p->getNumColonias(); k++) {
-						Colonia *col = p->pesquisaColonia(k);
-						if (col == nullptr)
-							return;
-					
-							int posS = col->pesquisaSer(j, i);
-							int posE = col->pesquisaEdificio(j, i);
-							if (posS != -1 || posE != -1) {
-								livre = false;
-							}
-					}
-					if (livre) {
-						Posicao p(j, i);
-						pos.push_back(p);
-						livre = true;
-					}
+					p->getPosicoesAdjacentes(j, i, pos);
 				}
 			}
 		}
@@ -705,7 +472,8 @@ void Aluno::efeito(Ser * s, Colonia * c,  Planicie * p) {
 			if (c == nullptr)
 				return;
 			s->aumentaSaude(s->getSaudeMaxima());
-			s->setAtaque(s->getTotalAtaque() + 5);
+			s->aumentaAtaque(5);
+			s->aumentaDefesa(5);
 			Edificio *e = c->pesquisaEdificioPorTipo(ID_CASTELO);
 			if (e == nullptr)
 				return;

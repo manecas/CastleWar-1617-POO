@@ -1,5 +1,6 @@
 // Biblioteca Consola para TP de POO
-// Última alteracao: 16/17 - Dez 2016
+// Última alteracao: 16/1
+//- Dez 2016
 // J
 
 /*
