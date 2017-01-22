@@ -13,7 +13,7 @@ using std::ostringstream;
 
 int Colonia::incrementaCor = 1;
 
-Colonia::Colonia(char l, Planicie * p):letra(l), cor(incrementaCor++), modoAtaque(false){
+Colonia::Colonia(char l, Planicie * p):letra(l), cor(incrementaCor++), modoAtaque(false), moedas(0){
 	if (p == nullptr)
 		return;
 

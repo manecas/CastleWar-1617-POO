@@ -577,7 +577,14 @@ void Planicie::sortearPerfisComputador(){
 		perfisComputador.push_back(new Perfil(*p));
 	}
 
-	for (int i = 0; i < 2; i++){
+	if (perfis.size() == 5) {
+		for (int i = 0; i < 2; i++) {
+			int randomP = random(0, perfisComputador.size() - 1);
+			delete perfisComputador[randomP];
+			perfisComputador.erase(perfisComputador.begin() + randomP);
+		}
+	}
+	else if(perfis.size() == 4){
 		int randomP = random(0, perfisComputador.size() - 1);
 		delete perfisComputador[randomP];
 		perfisComputador.erase(perfisComputador.begin() + randomP);

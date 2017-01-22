@@ -1,10 +1,6 @@
 dim 20 100
 moedas 100
 oponentes 1
-mkperfil w
-addperfil w 8
-addperfil w 14
-addperfil w 10
 mkperfil z
 addperfil z 1
 addperfil z 9
@@ -13,10 +9,6 @@ mkperfil x
 addperfil x 1
 addperfil x 8
 addperfil x 10
-mkperfil t
-addperfil x 1
-mkperfil u
-addperfil x 1
 castelo a 0 0
 castelo b 10 10
 inicio

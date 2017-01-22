@@ -70,7 +70,6 @@ public:
 	int removeCaracteristica(int id, char letraPerfil);
 	int setMoedas(int moedas);
 
-
 	//Computador
 	void sortearPerfisComputador();
 	void sortearComandoComputador();

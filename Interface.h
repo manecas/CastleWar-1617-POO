@@ -31,6 +31,8 @@ class Interface {
 	vector<Planicie*> jogosGuardados;
 	bool iniciouJogo;
 	bool definiuDimensao;
+	bool definiuOponentes;
+	bool definiuPerfil;
 	int x, y; //Foco do utilizador
 	string erro;
 	bool usarEid;

@@ -7,10 +7,12 @@
 using std::ostringstream;
 
 //--------------------------SER-----------------------------------------
-Ser::Ser(const Perfil & p): saudeMaxima(10), perfil(p), numAtaques(0) {
+Ser::Ser(const Perfil & p): saudeMaxima(10), perfil(p), numAtaques(0), saude(0), 
+ataque(0), defesa(0), velocidade(0), x(0), y(0){
 	ataque += p.getTotalAtaque();
 	defesa += p.getTotalDefesa();
 	saudeMaxima += p.getSaudeMaxima();
+	velocidade = p.getTotalVelocidade();
 	saude = saudeMaxima;
 }
 

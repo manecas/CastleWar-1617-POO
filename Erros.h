@@ -44,6 +44,8 @@ namespace Erros {
 	const int PERDESTE = 38;
 	const int GANHASTE = 39;
 	const int LETRA_PERFIL_INVALIDA = 40;
+	const int NAO_DEFINIU_OPONENTES = 41;
+	const int NAO_DEFINIU_PERFIL = 42;
 
 	const int COMANDO_NAO_RECONHECIDO = 101;
 }

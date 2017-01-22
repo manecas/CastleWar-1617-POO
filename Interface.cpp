@@ -8,7 +8,7 @@
 #include "Colonia.h"
 
 Interface::Interface() : iniciouJogo(false), definiuDimensao(false), x(0), y(0), 
-erro(""), fimJogo(false), usarEid(true) { }
+erro(""), fimJogo(false), usarEid(true), definiuOponentes(false){ }
 
 Interface::~Interface() { 
 	if(planicie != nullptr)
@@ -111,6 +111,8 @@ void Interface::interpretaLinha(string linha) {
 				if (!in)
 					return;
 				resultado = planicie->addColonias(num);
+				if (resultado == 25)
+					definiuOponentes = true;
 			}
 			else if (comando == "castelo") {
 				char letraCol;
@@ -126,6 +128,8 @@ void Interface::interpretaLinha(string linha) {
 				if (!in)
 					return;
 				resultado = planicie->criaPerfil(letraPerfil);
+				if (resultado == 29)
+					definiuPerfil = true;
 			}
 			else if (comando == "addperfil") {
 				char letraPerfil;
@@ -151,9 +155,19 @@ void Interface::interpretaLinha(string linha) {
 				resultado = planicie->removePerfil(letraPerfil);
 			}
 			else if (comando == "inicio") {
-				iniciouJogo = true; //Aqui sabemos que ja comecou o jogo
-				planicie->sortearPerfisComputador();
-				iniciaJogo();
+				if (definiuOponentes) {
+					if (definiuPerfil) {
+						iniciouJogo = true; //Aqui sabemos que ja comecou o jogo
+						planicie->sortearPerfisComputador();
+						iniciaJogo();
+					}
+					else {
+						resultado = 42;
+					}
+				}
+				else {
+					resultado = 41;
+				}
 			}
 			else {
 				resultado = 101;
@@ -389,7 +403,7 @@ void Interface::listaComandosConfiguracao() const{
 	Consola::gotoxy(82, 26);
 	cout << "moedas numero";
 	Consola::gotoxy(82, 27);
-	cout << "dim linhas colunas";
+	cout << "oponentes numero";
 	Consola::gotoxy(82, 28);
 	cout << "castelo colonia lin col";
 	Consola::gotoxy(82, 29);
@@ -402,8 +416,10 @@ void Interface::listaComandosConfiguracao() const{
 	cout << "rmperfil letra";
 	Consola::gotoxy(82, 33);
 	cout << "load ficheiro(nome)";
+	Consola::gotoxy(82, 34);
+	cout << "inicio(iniciar o jogo)";
 
-	desenhaRetanguloVazio(80, 21, 35, 121);
+	desenhaRetanguloVazio(80, 21, 36, 121);
 }
 
 void Interface::listaParias() const{
@@ -497,9 +513,10 @@ void Interface::listaCaracteristicasPerfil(){
 
 	int k = 1;
 	//Percorrer o vector de perfis
-	for (unsigned int i = 0; i < p.size(); i++, k += 15){
+	for (unsigned int i = 0; i < p.size(); i++, k += 16){
 		Consola::gotoxy(k, 1);
-		cout << "Perfil '" <<  p[i]->getLetra() << "'";
+		cout << "Perf '" <<  p[i]->getLetra() << "'";
+		cout << " F(" << p[i]->getForca() << ")";
 
 		p[i]->getCaracteristicas(c);
 		//Para cada perfil percorrer o vector das suas caracteristicas
@@ -607,7 +624,7 @@ void Interface::listaCoordenadasCastelos() const{
 		int y = planicie->pesquisaColonia(i)->pesquisaEdificioPorTipo(1)->getY();
 		cout << "(" << x << "," << y << ")";
 	}
-	desenhaRetanguloVazio(0, 16, 33, 60);
+	desenhaRetanguloVazio(0, 16, 33, 27);
 }
 
 void Interface::finalJogo(int codigo) {
@@ -655,6 +672,8 @@ void Interface::reiniciaVariaveis(){
 	fimJogo = false;
 	iniciouJogo = false;
 	definiuDimensao = false;
+	definiuOponentes = false;
+	definiuPerfil = false;
 }
 
 void Interface::desenhaPlanicie(int x, int y, int lin, int col) const {
@@ -917,7 +936,12 @@ void Interface::imprimeMensagens(int codigo){
 		case LETRA_PERFIL_INVALIDA:
 			erro = "Nao podes criar perfis com a letra 'i' ou 'j'";
 			break;
-
+		case NAO_DEFINIU_OPONENTES:
+			erro = "Ainda nao definiste os teus oponentes";
+			break;
+		case NAO_DEFINIU_PERFIL:
+			erro = "Ainda nao definiste pelo menos um perfil";
+			break;
 		case COMANDO_NAO_RECONHECIDO:
 			erro = "Comando não reconhecido";
 			break;
@@ -1072,7 +1096,7 @@ void Interface::menuInicial(){
 		Consola::gotoxy(60, 13);
 		cout << " \t \t \t \t";
 		Consola::gotoxy(50, 13);
-		cout << char(196) << char(62) << "Comando: ";
+		cout << "Comando: ";
 		cin >> opcao;
 
 		while (cin.fail()) {
