@@ -38,7 +38,7 @@ class Interface {
 
 public:
 	Interface();
-	virtual ~Interface(); //Ver isto
+	virtual ~Interface();
 
 	int pesquisaJogoGuardado(string nome);
 	int guardaJogo(string nome);
@@ -57,7 +57,9 @@ public:
 	void listaCaracteristicasPerfil(char letra); //Por letra
 	void listaColonia(char letra);
 	void listaCoordenadasCastelos()const;
+	void finalJogo(int codigo);
 	void limpa()const;
+	void reiniciaVariaveis();
 
 	void desenhaPlanicie(int x, int y, int lin, int col)const;
 	void desenhaSeresEdificios(int x, int y, int lin, int col)const;
@@ -67,7 +69,6 @@ public:
 	void iniciaJogo();
 	void configuraJogo();
 	void menuInicial();
-
 };
 
 #endif // !_INTERFACE

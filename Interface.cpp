@@ -290,17 +290,6 @@ void Interface::interpretaLinha(string linha) {
 			resultado = planicie->setModoRecolhe();
 		}
 		else if (comando == "fim") {
-			iniciouJogo = false;
-			definiuDimensao = false;
-			x = 0;
-			y = 0;
-			erro = "";
-			Edificio::reiniciaContador();
-			Colonia::reiniciaCor();
-			if (planicie != nullptr) {
-				delete planicie;
-				planicie = nullptr;
-			}
 			fimJogo = true;
 		}
 		else {
@@ -621,15 +610,51 @@ void Interface::listaCoordenadasCastelos() const{
 	desenhaRetanguloVazio(0, 16, 33, 60);
 }
 
+void Interface::finalJogo(int codigo) {
+	Consola::clrscr();
+	Consola::setScreenSize(40, 160); //X Y
+	Consola::setBackgroundColor(Consola::PRETO);
+	Consola::gotoxy(75, 20);
+	if (codigo == GANHASTE) {
+		Consola::setTextColor(Consola::VERDE_CLARO);
+		cout << "GANHASTE O JOGO";
+		Consola::gotoxy(70, 24);
+		cout << "Pressiona uma tecla para continuar...";
+	}
+	else {
+		Consola::setTextColor(Consola::VERMELHO_CLARO);
+		cout << "PERDESTE O JOGO";
+		Consola::gotoxy(70, 24);
+		cout << "Pressiona uma tecla para continuar...";
+	}
+	fimJogo = true;
+	Consola::getch();
+}
+
 void Interface::limpa() const{
 
-	for (int i = 1; i < 39 ; i++){
+	for (int i = 0; i < 40 ; i++){
 		for (int j = 55; j < 159; j++){
 			Consola::gotoxy(j, i);
 			cout << " ";
 		}
 
 	}
+}
+
+void Interface::reiniciaVariaveis(){
+	x = 0;
+	y = 0;
+	erro = "";
+	Edificio::reiniciaContador();
+	Colonia::reiniciaCor();
+	if (planicie != nullptr) {
+		delete planicie;
+		planicie = nullptr;
+	}
+	fimJogo = false;
+	iniciouJogo = false;
+	definiuDimensao = false;
 }
 
 void Interface::desenhaPlanicie(int x, int y, int lin, int col) const {
@@ -680,68 +705,6 @@ void Interface::desenhaPlanicie(int x, int y, int lin, int col) const {
 	else
 		cout << "Modo: Recolha";
 }
-
-//void Interface::desenhaPlanicie(int x, int y, int lin, int col) const {
-//
-//	int c = 1;
-//
-//	for (int i = y; i <= lin + y; i++) {
-//		for (int j = x; j <= col + x; j++) {
-//			Consola::gotoxy(j - x + 4, i - y + 4);
-//			if (planicie->verificaLimitePlanicie(j, i)) {
-//				if (c % 2 == 0) {
-//					Consola::setBackgroundColor(Consola::BRANCO);
-//					cout << " ";
-//				}
-//				else {
-//					Consola::setBackgroundColor(Consola::AMARELO);
-//					cout << " ";
-//				}
-//				c++;
-//			}
-//			else {
-//				Consola::setBackgroundColor(Consola::CINZENTO);
-//				cout << " ";
-//			}
-//		}
-//	}
-//	Consola::setBackgroundColor(Consola::PRETO);
-//	Colonia *colonia = planicie->pesquisaColonia(LETRAS[0]);
-//	if (colonia == nullptr)
-//		return;
-//	Consola::gotoxy(11, 30);
-//	cout << " \t \t";
-//	Consola::gotoxy(4, 30);
-//	cout << "Moedas: " << colonia->getMoedas();
-//}
-
-//void Interface::desenhaPlanicie(int x, int y, int lin, int col) const{
-//
-//	int c = 1;
-//
-//	for (int i = y; i <= lin + y; i++){
-//		for (int j = x; j <= col + x; j++){
-//			Consola::gotoxy(j, i);
-//			if (c % 2 == 0) {
-//				Consola::setBackgroundColor(Consola::BRANCO);
-//				cout << " ";
-//			}
-//			else {
-//				Consola::setBackgroundColor(Consola::AMARELO);
-//				cout << " ";
-//			}
-//			c++;
-//		}
-//	}
-//	Consola::setBackgroundColor(Consola::PRETO);
-//	Colonia *colonia = planicie->pesquisaColonia(LETRAS[0]);
-//	if (colonia == nullptr)
-//		return;
-//	Consola::gotoxy(11, 30);
-//	cout << " \t \t";
-//	Consola::gotoxy(4, 30);
-//	cout << "Moedas: " << colonia->getMoedas();
-//}
 
 void Interface::desenhaSeresEdificios(int x, int y, int lin, int col) const{
 
@@ -946,10 +909,10 @@ void Interface::imprimeMensagens(int codigo){
 			erro = "Nao podes vender o castelo";
 			break;
 		case PERDESTE:
-			erro = "PERDESTE";
+			finalJogo(PERDESTE);
 			break;
 		case GANHASTE:
-			erro = "GANHASTE";
+			finalJogo(GANHASTE);
 			break;
 		case LETRA_PERFIL_INVALIDA:
 			erro = "Nao podes criar perfis com a letra 'i' ou 'j'";
@@ -1096,9 +1059,7 @@ void Interface::menuInicial(){
 			Consola::setScreenSize(90, 50);
 			Consola::setBackgroundColor(Consola::PRETO);
 			Consola::setTextColor(Consola::VERDE_CLARO);
-			delete planicie;
-			planicie = nullptr;
-			fimJogo = false;
+			reiniciaVariaveis();
 		}
 
 		Consola::gotoxy(50, 5);
