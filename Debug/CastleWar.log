@@ -1,7 +1,15 @@
-﻿  Interface.cpp
-  Generating Code...
-  Compiling...
+﻿  Ser.cpp
+  Posicao.cpp
+  Planicie.cpp
+  Perfil.cpp
   Main.cpp
+  Interface.cpp
+  FabricaEdificios.cpp
+  FabricaCaracteristicas.cpp
+  Edificio.cpp
+  Consola.cpp
+  Colonia.cpp
+  Caracteristica.cpp
   Generating Code...
   CastleWar.vcxproj -> C:\Users\Luis\Dropbox\3º Ano\1º Semestre\POO\Prática\Trabalho Prático\CastleWar-1617-POO\Debug\CastleWar.exe
   CastleWar.vcxproj -> C:\Users\Luis\Dropbox\3º Ano\1º Semestre\POO\Prática\Trabalho Prático\CastleWar-1617-POO\Debug\CastleWar.pdb (Full PDB)
